@@ -83,4 +83,74 @@ Documentary 90s-street photography style, heavy grain, deadpan.
 
 ---
 
-## BATCH 2 — pending
+## BATCH 2 — received 2026-06-11
+
+### B2-01 · The cat again (duplicate of B1-05)
+Sent twice. Counted as a **double vote** for the deadpan B&W documentary
+register. The cat is canon.
+
+### B2-02 · Vaporwave pixel-art desktop (cyan field, pink/magenta windows)
+Retro OS desktop: title-barred windows (`WEATHER.exe`, `rain.mp4`,
+`ocean.mpeg`), taskbar with Start button and `4:20 AM` clock, pixel icons.
+**Extract:**
+- NOT the palette (pink/magenta/pastel violates the no-purple rule and the
+  techwear base). What survives: **OS-chrome as a framing device** — title
+  bars, window controls, a taskbar — for the site's overlay surfaces: the
+  terminal window, `/status`, possibly project media framed as named windows
+  (`jxn-001.mp4` energy).
+- Strict two-color UI discipline inside a window: chrome in one ink, content
+  in the palette. Maps cleanly onto our accent + ink system.
+- The labeled-file naming joke (`plants.exe`) fits the site's deadpan register.
+
+### B2-03 · neofetch terminal screenshot (ASCII Apple logo + system info)
+Black terminal, colored ASCII art left, `key: value` system readout right,
+terminal color-swatch strip at the bottom.
+**Extract:**
+- **Direct feature confirmation:** the site terminal gets a `fetch` command —
+  neofetch-style readout with custom ASCII art (JXN mark or the cat — decide
+  later) and real site/server stats: OS, uptime, stack, catalog number.
+- The `key: value` mono readout IS our NATO-label metadata styling — same
+  layout language for project card meta and the /status page.
+- The terminal **color-swatch strip** as a tiny flex: the site's actual design
+  tokens rendered as swatches in the footer or /status. Design system as
+  liner-note credit.
+
+### B2-04 · THE PORTRAIT (canonical) — Norbert, warm outdoor light
+Curly hair, smirk, chain necklace, patterned shirt, soft warm background bokeh.
+**Extract:**
+- This is the spec's "warm portrait." Treatment per spec: slight
+  duotone/desaturation to sit in the cold palette **without losing the smirk**.
+- He is literally wearing the chain — the gold accent philosophy embodied.
+  When duotoning, the chain glint is the one element allowed to stay warm
+  (gold pass), if technically clean. Jewelry on the techwear, in the image
+  itself.
+- Pairs with the B1-03 treatment: silhouette resolving from dither/texture
+  into the duotone portrait on scroll.
+- ⚠ Need the original file delivered into the repo (chat images arrive
+  inline). Placeholder box until then.
+
+### B2-05 · "To Pimp a Butterfly" album cover
+B&W group photo mounted inside a plain warm-grey sleeve border, advisory badge
+bottom-right.
+**Extract:**
+- **The sleeve-mount framing:** photography presented as an artifact — image
+  block inset within a flat border field, generous margins, nothing bleeding.
+  Use for the portrait and project imagery: mounted, not full-bleed.
+- Monochrome documentary grade with deep blacks — consistent with B1-05.
+- The advisory badge is explicitly banned by the spec and stays banned. The
+  *idea* that survives: a small rectangular mono **metadata stamp** (catalog
+  number, side, year) placed with that same corner discipline.
+
+### Batch 2 — cross-cutting signals
+1. **Terminal is load-bearing:** two of five references are screen/OS culture.
+   The terminal + OS-chrome overlays graduate from easter egg to a core
+   design surface.
+2. **Cyan survives another round** (vaporwave field), pink/purple explicitly
+   does not. Cold cyan × champagne gold remains the leading palette candidate.
+3. **Mounted, not full-bleed:** imagery as sleeve-framed artifact.
+4. **The portrait is canon:** warm, smirking, chain on. Duotone to fit, glint
+   stays.
+
+---
+
+## BATCH 3 — pending
