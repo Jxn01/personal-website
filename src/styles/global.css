@@ -766,27 +766,50 @@ html.dropped #needle {
   translate: 0 0;
 }
 
-/* — the record flip (view transitions via ClientRouter) ——————————————————— */
-/* SIDE A ↔ SIDE B: one full beat — 333ms out, 333ms in */
-html[data-vt="flip"]::view-transition-old(root) {
-  animation: vt-flip-out var(--beat-half) var(--ease-in-out) both;
+/* — the record flip (hand-rolled, identical in every browser) ————————————— */
+/* SIDE A ↔ SIDE B: one full beat — 333ms out, edge-on while loading, 333ms in */
+html.flip-out body {
+  animation: page-flip-out var(--beat-half) var(--ease-in-out) both;
+  pointer-events: none;
 }
 
-html[data-vt="flip"]::view-transition-new(root) {
-  animation: vt-flip-in var(--beat-half) var(--ease-in-out) var(--beat-half) both;
+html.flip-in body {
+  animation: page-flip-in var(--beat-half) var(--ease-in-out) both;
 }
 
-@keyframes vt-flip-out {
+@keyframes page-flip-out {
   to {
-    transform: perspective(1400px) rotateY(-88deg);
-    opacity: 0.4;
+    transform: perspective(1300px) rotateY(-87deg);
+    opacity: 0.5;
   }
 }
 
-@keyframes vt-flip-in {
+@keyframes page-flip-in {
   from {
-    transform: perspective(1400px) rotateY(88deg);
-    opacity: 0.4;
+    transform: perspective(1300px) rotateY(87deg);
+    opacity: 0.5;
+  }
+}
+
+/* while the record is on edge, the label keeps the beat */
+html.flip-out::after,
+html.flip-in::after {
+  content: "JXN-000 ◌ flipping";
+  position: fixed;
+  inset: 50% auto auto 50%;
+  translate: -50% -50%;
+  z-index: 99;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  letter-spacing: 0.3em;
+  color: var(--gold);
+  animation: flip-label-pulse var(--beat) var(--ease-in-out) infinite;
+  pointer-events: none;
+}
+
+@keyframes flip-label-pulse {
+  50% {
+    opacity: 0.35;
   }
 }
 
@@ -1085,13 +1108,21 @@ html.pocket body::before {
   color: var(--error);
 }
 
-/* — spray overlay ————————————————————————————————————————————————————————— */
-#spray-canvas {
-  position: fixed;
-  inset: 0;
-  z-index: var(--z-spray);
+/* — THE WALL: document-anchored paint layer (always visible) ——————————————— */
+#jxn-wall {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 45; /* over content, under header/deck/overlays */
+  pointer-events: none;
+}
+
+/* armed while the spray can is uncapped */
+#jxn-wall.armed {
+  pointer-events: auto;
   cursor: crosshair;
   touch-action: none;
+  z-index: var(--z-spray);
 }
 
 .spray-tools {
@@ -1135,4 +1166,228 @@ html.pocket body::before {
   .ov-window {
     animation: none;
   }
+}
+
+/* ============================================================================
+   V3 — COLOR BELOW THE FOLD. every track sits in its own light.
+   Corner washes + halftone dot ramps, full-bleed, cycling three inks.
+   Different texture from the hero on purpose: print, not phosphor.
+   ========================================================================== */
+
+main > .track:not(.hero) {
+  --amb: var(--accent);
+}
+
+main > .track:not(.hero)::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: calc(50% - 50vw);
+  width: 100vw;
+  z-index: -2;
+  pointer-events: none;
+  background:
+    /* cover: fades the dots away from the corner */
+    radial-gradient(110% 120% at var(--amb-x, 100%) 0%, transparent 16%, var(--bg-0) 56%),
+    /* halftone dot ramp — screen-print, not phosphor */
+    radial-gradient(closest-side, color-mix(in oklab, var(--amb) 30%, transparent) 30%, transparent 33%)
+      0 0 / 9px 9px,
+    /* the wash */
+    radial-gradient(72% 60% at var(--amb-x, 100%) 0%, color-mix(in oklab, var(--amb) 17%, transparent), transparent 72%);
+}
+
+/* ink + corner rotation through the tracklist */
+main > .track:nth-of-type(3n) {
+  --amb: var(--gold);
+}
+
+main > .track:nth-of-type(3n + 1):not(.hero) {
+  --amb: var(--mint);
+}
+
+main > .track:nth-of-type(even) {
+  --amb-x: 0%;
+}
+
+/* splats follow the section ink too */
+main > .track:nth-of-type(3n) .track-head::before {
+  background: var(--gold);
+}
+
+main > .track:nth-of-type(3n + 1):not(.hero) .track-head::before {
+  background: var(--mint);
+}
+
+main > .track:nth-of-type(3n) .track-head h2 {
+  background-image: linear-gradient(
+    color-mix(in oklab, var(--gold) 38%, transparent),
+    color-mix(in oklab, var(--gold) 38%, transparent)
+  );
+}
+
+main > .track:nth-of-type(3n + 1):not(.hero) .track-head h2 {
+  background-image: linear-gradient(
+    color-mix(in oklab, var(--mint) 34%, transparent),
+    color-mix(in oklab, var(--mint) 34%, transparent)
+  );
+}
+
+/* — more ink in the content itself ———————————————————————————————————————— */
+.tier:nth-of-type(1) h3 {
+  color: var(--accent);
+}
+
+.tier:nth-of-type(2) h3 {
+  color: var(--gold);
+}
+
+.tier:nth-of-type(3) h3 {
+  color: var(--mint);
+}
+
+.xp-domains li:nth-child(1) {
+  border-left-color: var(--accent);
+}
+
+.xp-domains li:nth-child(2) {
+  border-left-color: var(--gold);
+}
+
+.xp-domains li:nth-child(3) {
+  border-left-color: var(--mint);
+}
+
+.xp-domains li:nth-child(1) strong {
+  color: var(--accent);
+}
+
+.xp-domains li:nth-child(2) strong {
+  color: var(--gold);
+}
+
+.xp-domains li:nth-child(3) strong {
+  color: var(--mint);
+}
+
+.proj-head h3 {
+  transition: color var(--beat-quarter) var(--ease-out);
+}
+
+.sleeve:hover .proj-head h3 {
+  color: var(--accent);
+}
+
+.lab-strip {
+  border-left-color: var(--gold-dim);
+}
+
+.lab-strip .lab-item strong {
+  color: var(--gold);
+}
+
+/* — global ascii-plant registers (sapling at NOW, anywhere else it sprouts) — */
+.b-leaf {
+  color: var(--accent);
+}
+
+.b-trunk {
+  color: var(--gold);
+}
+
+.b-pot {
+  color: var(--ink-2);
+}
+
+.now-grid {
+  display: grid;
+  grid-template-columns: minmax(0, var(--measure)) auto;
+  gap: 1.5rem;
+  align-items: end;
+}
+
+.now-sapling {
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  line-height: 1.15;
+  margin: 0;
+  opacity: 0.9;
+}
+
+@media (max-width: 840px) {
+  .now-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* — souls card: YOU DIED ———————————————————————————————————————————————————— */
+[data-egg="souls"] {
+  cursor: pointer;
+}
+
+#youdied {
+  position: fixed;
+  inset: 0;
+  z-index: 98;
+  display: grid;
+  place-items: center;
+  background: rgba(8, 5, 4, 0.82);
+  pointer-events: none;
+  opacity: 0;
+}
+
+#youdied.show {
+  animation: youdied calc(var(--beat) * 3) var(--ease-in-out) forwards;
+}
+
+#youdied span {
+  font-family: var(--font-display);
+  font-size: clamp(3rem, 9vw, 7rem);
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  color: var(--error);
+  transform: scaleY(1.25);
+  text-shadow: 0 0 60px color-mix(in oklab, var(--error) 50%, transparent);
+}
+
+@keyframes youdied {
+  0% { opacity: 0; }
+  18% { opacity: 1; }
+  78% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+/* — d20 chip (D&D card) ————————————————————————————————————————————————————— */
+.js-d20 {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  margin-top: 0.6rem;
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  color: var(--accent);
+}
+
+.js-d20::before {
+  content: "[ ";
+  color: var(--ink-3);
+}
+
+.js-d20::after {
+  content: " ]";
+  color: var(--ink-3);
+}
+
+.js-d20:hover {
+  color: var(--gold);
+}
+
+.js-d20.rolling {
+  animation: d20-shake calc(var(--beat-quarter)) linear infinite;
+}
+
+@keyframes d20-shake {
+  25% { translate: 1px 0; }
+  75% { translate: -1px 0; }
 }

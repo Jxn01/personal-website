@@ -5,7 +5,7 @@ import "@/styles/global.css";
 import { ClientRouter } from "astro:transitions";
 import type { Locale } from "@/i18n";
 import { getDict } from "@/i18n";
-import { BASE, withBase } from "@/lib/url";
+import { withBase } from "@/lib/url";
 import Deck from "@/islands/Deck";
 
 interface Props {
@@ -77,32 +77,13 @@ the toys are in the deck, bottom right. the terminal also answers to ~
       })();
     </script>
 
-    {/* the record flip: SIDE A ↔ SIDE B gets the theatrics, in-place, no reload */}
-    <script is:inline define:vars={{ base: BASE }}>
-      (function () {
-        var seg = function (p) {
-          if (base && p.indexOf(base) === 0) p = p.slice(base.length);
-          return p.split("/").filter(Boolean)[0];
-        };
-        var locales = ["en", "hu"];
-        document.addEventListener("astro:before-swap", function (e) {
-          var was = seg(new URL(e.from).pathname);
-          var is_ = seg(new URL(e.to).pathname);
-          if (locales.indexOf(was) > -1 && locales.indexOf(is_) > -1 && was !== is_) {
-            e.newDocument.documentElement.dataset.vt = "flip";
-            document.documentElement.dataset.vt = "flip";
-          }
-        });
-        document.addEventListener("astro:page-load", function () {
-          // the dropped flag lives on <html>, which swaps — restore it
-          if (sessionStorage.getItem("jxn.dropped")) {
-            document.documentElement.classList.add("dropped");
-          }
-          window.setTimeout(function () {
-            delete document.documentElement.dataset.vt;
-          }, 700);
-        });
-      })();
+    {/* the dropped flag lives on <html>, which the router swaps — restore it */}
+    <script is:inline>
+      document.addEventListener("astro:page-load", function () {
+        if (sessionStorage.getItem("jxn.dropped")) {
+          document.documentElement.classList.add("dropped");
+        }
+      });
     </script>
   </head>
   <body>
@@ -131,6 +112,7 @@ the toys are in the deck, bottom right. the terminal also answers to ~
 
     {variant === "default" && <script>import "@/scripts/needle";</script>}
     <script>import "@/scripts/eggs";</script>
+    <script>import "@/scripts/flip";</script>
 
     <style>
       .skip-link {

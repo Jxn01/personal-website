@@ -5,10 +5,12 @@ import Footer from "@/components/Footer.astro";
 import Waveform from "@/components/Waveform.astro";
 import Playhead from "@/components/Playhead.astro";
 import AsciiHero from "@/islands/AsciiHero";
+import MatterDemo from "@/islands/MatterDemo";
 import Portrait from "@/components/Portrait.astro";
 import type { Locale } from "@/i18n";
 import { getDict, mmss, readingSeconds, trackNo } from "@/i18n";
 import { config } from "@/config";
+import { bonsaiToHtml, growBonsai } from "@/lib/bonsai";
 
 interface Props {
   locale: Locale;
@@ -48,6 +50,12 @@ const track = (i: number) => ({
 });
 
 const catalogNote = (cat: string) => `cat. no. ${cat} — from the crate`;
+
+// a small tree for 09 — NOW, grown at build time. zero JS, pure ASCII.
+const sapGen = growBonsai(0xa11ce, 18);
+let sapling = sapGen.next();
+while (!sapling.done) sapling = sapGen.next();
+const saplingHtml = bonsaiToHtml(sapling.value);
 ---
 
 <Base locale={locale}>
@@ -156,6 +164,7 @@ const catalogNote = (cat: string) => `cat. no. ${cat} — from the crate`;
               {p.paras.map((para) => (
                 <p set:html={para} />
               ))}
+              {p.catalog === "JXN-001" && <MatterDemo client:visible />}
               {p.status && <p class="stamp">{p.status}</p>}
             </article>
           ))
@@ -252,12 +261,26 @@ const catalogNote = (cat: string) => `cat. no. ${cat} — from the crate`;
       </div>
       <div class="offclock-grid">
         {
-          d.offclock.items.map((item, i) => (
-            <div class="sleeve reveal" style={`--i: ${i % 3}`}>
-              <h3>{item.label}</h3>
-              <p set:html={item.body} />
-            </div>
-          ))
+          d.offclock.items.map((item, i) => {
+            const isSouls = item.label.toLowerCase().includes("souls");
+            const isDnd = item.label.includes("D&D");
+            return (
+              <div
+                class="sleeve reveal"
+                style={`--i: ${i % 3}`}
+                data-egg={isSouls ? "souls" : undefined}
+                title={isSouls ? "go on. touch it." : undefined}
+              >
+                <h3>{item.label}</h3>
+                <p set:html={item.body} />
+                {isDnd && (
+                  <button class="js-d20" type="button">
+                    {d.ui.rollD20}
+                  </button>
+                )}
+              </div>
+            );
+          })
         }
       </div>
     </section>
@@ -271,11 +294,20 @@ const catalogNote = (cat: string) => `cat. no. ${cat} — from the crate`;
         <h2>{d.now.title}</h2>
         <span class="dur">{mmss(secs[8] ?? 0)}</span>
       </div>
-      <p class="reveal"><strong>{d.now.lead}</strong></p>
-      <ul class="now-list reveal">
-        {d.now.items.map((item) => <li>{item.replace("%GAME%", game)}</li>)}
-      </ul>
-      <p class="label reveal">{d.now.lastUpdatedLabel} {nowDate}</p>
+      <div class="now-grid">
+        <div>
+          <p class="reveal"><strong>{d.now.lead}</strong></p>
+          <ul class="now-list reveal">
+            {d.now.items.map((item) => <li>{item.replace("%GAME%", game)}</li>)}
+          </ul>
+          <p class="label reveal">{d.now.lastUpdatedLabel} {nowDate}</p>
+        </div>
+        <pre
+          class="now-sapling reveal"
+          aria-label="a small ascii bonsai, grown at build time"
+          set:html={saplingHtml}
+        />
+      </div>
     </section>
 
     <div class="container"><Waveform seed={9} /></div>
@@ -289,6 +321,9 @@ const catalogNote = (cat: string) => `cat. no. ${cat} — from the crate`;
       </div>
       <p class="contact-lead reveal"><strong>{d.contact.lead}</strong></p>
       <p class="reveal">{d.contact.body}</p>
+      <p class="reveal">
+        <button class="bracket js-hire" type="button">sudo hire-me</button>
+      </p>
       <ul class="contact-list reveal">
         <li>
           <span class="label">{d.contact.emailLabel}:</span>{" "}

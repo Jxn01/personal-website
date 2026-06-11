@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
-import Terminal from "./Terminal";
+import Terminal, { queueTermCommand } from "./Terminal";
 import Pads from "./Pads";
 import Spray from "./Spray";
 import Mixer, { applyMix, loadMix } from "./Mixer";
 import StatusModal from "./StatusModal";
+import { mountWall, resizeWall } from "../lib/wall";
 
 /**
  * THE DECK — the visible toy chest, bottom right. No ARG energy: you see a
@@ -41,18 +42,31 @@ export default function Deck(): React.ReactElement {
         setOpen(null);
       }
     };
-    // the saved mix lives on <html>'s inline style, which the router swaps —
-    // re-apply it on every soft navigation (and on first mount)
-    const reapplyMix = (): void => applyMix(loadMix());
-    reapplyMix();
-    document.addEventListener("astro:page-load", reapplyMix);
+    // the saved mix lives on <html>'s inline style and the wall hangs on
+    // <body> — both get swapped by the router, so re-hang on every page-load
+    const rehang = (): void => {
+      applyMix(loadMix());
+      mountWall();
+    };
+    rehang();
+    document.addEventListener("astro:page-load", rehang);
+    addEventListener("resize", resizeWall);
+
+    // anything on the page can open the terminal with a command queued
+    const onTermRun = (e: Event): void => {
+      queueTermCommand((e as CustomEvent<string>).detail);
+      setOpen("term");
+    };
+    addEventListener("jxn:term-run", onTermRun);
 
     addEventListener("jxn:overlay", onOverlay);
     addEventListener("keydown", onKey);
     return () => {
       removeEventListener("jxn:overlay", onOverlay);
       removeEventListener("keydown", onKey);
-      document.removeEventListener("astro:page-load", reapplyMix);
+      removeEventListener("jxn:term-run", onTermRun);
+      removeEventListener("resize", resizeWall);
+      document.removeEventListener("astro:page-load", rehang);
     };
   }, []);
 

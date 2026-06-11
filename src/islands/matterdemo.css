@@ -1,0 +1,57 @@
+/* JXN-001 — the ceiling keeps up, in miniature */
+
+.md {
+  margin: 1rem 0 1.2rem;
+  display: grid;
+  gap: 0.6rem;
+  justify-items: start;
+}
+
+.md-room {
+  width: min(340px, 100%);
+  display: grid;
+  gap: 0.55rem;
+  padding: 0.9rem;
+  background: var(--bg-0);
+  border: 1px solid var(--line-0);
+  border-radius: var(--radius);
+}
+
+/* the bulbs live above the screen — that was the whole complaint */
+.md-bulbs {
+  display: flex;
+  justify-content: space-between;
+  padding-inline: 0.4rem;
+}
+
+.md-bulb {
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 50%;
+  background: var(--bg-3);
+  transition: background 180ms linear;
+}
+
+.md-screen {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  border-radius: 3px;
+  border: 2px solid var(--bg-3);
+  overflow: hidden;
+}
+
+/* zone designer hairlines over the "content" */
+.md-zones {
+  position: absolute;
+  inset: 0;
+  display: flex;
+}
+
+.md-zones i {
+  flex: 1;
+  border-right: 1px dashed rgba(10, 8, 7, 0.35);
+}
+
+.md-zones i:last-child {
+  border-right: none;
+}

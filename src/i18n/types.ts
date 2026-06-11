@@ -57,6 +57,7 @@ export interface Dict {
     statusLink: string;
     portraitLabel: string; // machine label on the portrait placeholder
     trackLabel: string; // "track" — used by the playhead
+    rollD20: string; // the chip on the D&D card
   };
   hero: {
     name: string;

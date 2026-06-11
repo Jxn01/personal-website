@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { navigate } from "astro:transitions/client";
 import { growBonsai, bonsaiToHtml } from "../lib/bonsai";
 import { withBase } from "../lib/url";
 import type { OverlayId } from "./Deck";
@@ -63,6 +62,12 @@ let scrollback: Line[] = [];
 let history: string[] = [];
 let lineSeq = 0;
 
+// mailbox: the deck queues a command, the terminal runs it on mount
+let queued: string | null = null;
+export function queueTermCommand(cmd: string): void {
+  queued = cmd;
+}
+
 interface Props {
   onClose: () => void;
   onOverlay: (id: OverlayId) => void;
@@ -94,6 +99,11 @@ export default function Terminal({ onClose, onOverlay }: Props): React.ReactElem
       raw(
         `<span class="t-dim">jxn-000 terminal — type <span class="t-accent">help</span>. or don't. exploration is respected.</span>`,
       );
+    }
+    if (queued) {
+      const cmd = queued;
+      queued = null;
+      window.setTimeout(() => run(cmd), 280);
     }
     return () => window.clearInterval(bonsaiTimer.current);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -187,7 +197,9 @@ export default function Terminal({ onClose, onOverlay }: Props): React.ReactElem
       }
       out("flipping the record…");
       window.setTimeout(() => {
-        void navigate(withBase(side === "a" ? "/en" : "/hu"));
+        dispatchEvent(
+          new CustomEvent("jxn:flip", { detail: withBase(side === "a" ? "/en" : "/hu") }),
+        );
       }, 350);
     },
     pads: () => onOverlay("pads"),

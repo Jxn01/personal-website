@@ -18,6 +18,7 @@ export const en: Dict = {
     statusLink: "status",
     portraitLabel: "fig.01 · norbert oláh · budapest · duotone",
     trackLabel: "track",
+    rollD20: "roll d20",
   },
   hero: {
     name: "Norbert Oláh",

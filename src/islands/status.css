@@ -21,8 +21,9 @@
   font-size: 0.74rem;
   line-height: 1.22;
   margin: 0;
-  overflow-x: auto;
-  min-height: 17em;
+  /* exact height of the grid — the tree grows in place, no scrollbar */
+  height: calc(19 * 1.22em);
+  overflow: hidden;
 }
 
 .st-grove .b-leaf {

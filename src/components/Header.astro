@@ -37,7 +37,7 @@ const sides: { side: "A" | "B"; locale: Locale }[] = [
           s.locale === locale ? (
             <span aria-current="true">SIDE {s.side}</span>
           ) : (
-            <a href={withBase(`/${other}${path}`)} hreflang={other} lang={other}>
+            <a href={withBase(`/${other}${path}`)} hreflang={other} lang={other} data-flip>
               SIDE {s.side}
             </a>
           ),

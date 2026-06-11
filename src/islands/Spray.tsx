@@ -1,13 +1,12 @@
 import { useEffect, useRef, useState } from "react";
 import { resolveColor } from "../lib/colors";
+import { saveWall, wallCanvas, wipeWall } from "../lib/wall";
 
 /**
- * TAG — a spray can for the whole site. Real spray dynamics: soft particle
- * cloud, overspray, and drips when you linger. Your piece is saved locally
- * and welcomes you back. The wall doesn't judge; the wall remembers.
+ * TAG — the spray can. Draws onto THE WALL (document-anchored: paint stays
+ * where you put it as you scroll, and stays visible after you cap the can).
+ * Real spray dynamics: soft particle cloud, overspray, drips when you linger.
  */
-
-const STORE = "jxn.wall";
 
 interface Drip {
   x: number;
@@ -23,7 +22,6 @@ interface Props {
 }
 
 export default function Spray({ onClose }: Props): React.ReactElement {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
   const [colors, setColors] = useState<string[]>([]);
   const [color, setColor] = useState("");
   const colorRef = useRef(color);
@@ -40,23 +38,13 @@ export default function Spray({ onClose }: Props): React.ReactElement {
     setColors(palette);
     setColor(palette[0]!);
 
-    const canvas = canvasRef.current;
+    const canvas = wallCanvas();
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    const dpr = Math.min(devicePixelRatio || 1, 2);
-    canvas.width = innerWidth * dpr;
-    canvas.height = innerHeight * dpr;
-    ctx.scale(dpr, dpr);
-
-    // the wall remembers
-    const saved = localStorage.getItem(STORE);
-    if (saved) {
-      const img = new Image();
-      img.onload = () => ctx.drawImage(img, 0, 0, innerWidth, innerHeight);
-      img.src = saved;
-    }
+    // arm the wall: it catches pointers only while the can is uncapped
+    canvas.classList.add("armed");
 
     const drips: Drip[] = [];
     let spraying = false;
@@ -64,10 +52,13 @@ export default function Spray({ onClose }: Props): React.ReactElement {
     let lastY = 0;
     let linger = 0;
 
+    const gauss = (): number =>
+      (Math.random() + Math.random() + Math.random() - 1.5) / 1.5;
+
+    // page coordinates — paint belongs to the document, not the viewport
     function burst(x: number, y: number): void {
       if (!ctx) return;
       ctx.fillStyle = colorRef.current;
-      // dense core
       for (let i = 0; i < 38; i++) {
         const a = Math.random() * Math.PI * 2;
         const r = Math.abs(gauss()) * 11;
@@ -75,7 +66,6 @@ export default function Spray({ onClose }: Props): React.ReactElement {
         const size = Math.random() * 1.6 + 0.4;
         ctx.fillRect(x + Math.cos(a) * r, y + Math.sin(a) * r, size, size);
       }
-      // overspray halo
       for (let i = 0; i < 10; i++) {
         const a = Math.random() * Math.PI * 2;
         const r = 12 + Math.random() * 22;
@@ -85,23 +75,18 @@ export default function Spray({ onClose }: Props): React.ReactElement {
       ctx.globalAlpha = 1;
     }
 
-    function gauss(): number {
-      return (Math.random() + Math.random() + Math.random() - 1.5) / 1.5;
-    }
-
     function onDown(e: PointerEvent): void {
-      if ((e.target as HTMLElement).closest(".spray-tools")) return;
       spraying = true;
       linger = 0;
-      lastX = e.clientX;
-      lastY = e.clientY;
-      burst(e.clientX, e.clientY);
+      lastX = e.pageX;
+      lastY = e.pageY;
+      burst(e.pageX, e.pageY);
     }
 
     function onMove(e: PointerEvent): void {
       if (!spraying) return;
-      const dx = e.clientX - lastX;
-      const dy = e.clientY - lastY;
+      const dx = e.pageX - lastX;
+      const dy = e.pageY - lastY;
       const dist = Math.hypot(dx, dy);
       const steps = Math.max(1, Math.floor(dist / 4));
       for (let i = 0; i < steps; i++) {
@@ -111,8 +96,8 @@ export default function Spray({ onClose }: Props): React.ReactElement {
       linger = dist < 3 ? linger + 1 : 0;
       if (linger > 6 && Math.random() < 0.3 && drips.length < 24) {
         drips.push({
-          x: e.clientX + gauss() * 6,
-          y: e.clientY + 4,
+          x: e.pageX + gauss() * 6,
+          y: e.pageY + 4,
           len: 0,
           max: 24 + Math.random() * 70,
           w: 1 + Math.random() * 1.4,
@@ -120,8 +105,8 @@ export default function Spray({ onClose }: Props): React.ReactElement {
         });
         linger = 0;
       }
-      lastX = e.clientX;
-      lastY = e.clientY;
+      lastX = e.pageX;
+      lastY = e.pageY;
     }
 
     function onUp(): void {
@@ -150,12 +135,9 @@ export default function Spray({ onClose }: Props): React.ReactElement {
     raf = requestAnimationFrame(dripFrame);
 
     return () => {
-      // the wall remembers — save on the way out
-      try {
-        localStorage.setItem(STORE, canvas.toDataURL("image/png"));
-      } catch {
-        /* a very large piece; the wall forgives */
-      }
+      // cap the can: disarm the wall, keep the paint, save the piece
+      canvas.classList.remove("armed");
+      saveWall();
       cancelAnimationFrame(raf);
       canvas.removeEventListener("pointerdown", onDown);
       removeEventListener("pointermove", onMove);
@@ -163,36 +145,24 @@ export default function Spray({ onClose }: Props): React.ReactElement {
     };
   }, []);
 
-  const wipe = (): void => {
-    const canvas = canvasRef.current;
-    const ctx = canvas?.getContext("2d");
-    if (canvas && ctx) {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      localStorage.removeItem(STORE);
-    }
-  };
-
   return (
-    <>
-      <canvas id="spray-canvas" ref={canvasRef} aria-label="spray wall" />
-      <div className="spray-tools" role="toolbar" aria-label="spray tools">
-        {colors.map((c) => (
-          <button
-            key={c}
-            className="spray-swatch"
-            style={{ background: c }}
-            aria-pressed={color === c}
-            aria-label={`color ${c}`}
-            onClick={() => setColor(c)}
-          />
-        ))}
-        <button className="deck-btn" onClick={wipe} title="buff the wall">
-          wipe
-        </button>
-        <button className="deck-btn" onClick={onClose} title="put the cap back on">
-          done
-        </button>
-      </div>
-    </>
+    <div className="spray-tools" role="toolbar" aria-label="spray tools">
+      {colors.map((c) => (
+        <button
+          key={c}
+          className="spray-swatch"
+          style={{ background: c }}
+          aria-pressed={color === c}
+          aria-label={`color ${c}`}
+          onClick={() => setColor(c)}
+        />
+      ))}
+      <button className="deck-btn" onClick={wipeWall} title="buff the wall">
+        wipe
+      </button>
+      <button className="deck-btn" onClick={onClose} title="put the cap back on">
+        done
+      </button>
+    </div>
   );
 }

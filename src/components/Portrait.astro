@@ -4,38 +4,17 @@ import portrait from "@/assets/portrait.jpeg";
 
 /**
  * The portrait. Warm human on a cold site = intended tension (spec 1.2).
- * Treatment: a three-stop duotone (near-black shadows → teal mids → cream
- * highlights) so it sits in the palette without losing the smirk. Halftone
- * dot screen + scanlines for the print-artifact register. On scroll it
- * "resolves" — dithered/blurred → clean — the B3-04 reference, live.
- *
- * The chain glint: a soft gold wash low-right, where the necklace catches
- * light. Jewelry on the techwear, in the image itself.
+ * Duotone is done in CSS (grayscale base + a color-blend tint of the live
+ * accent), so the photo re-inks itself with the side, and with the mixer:
+ * pink on SIDE A, peach on SIDE B, whatever you fade it to in MIX.
+ * Halftone dot screen + scanlines keep the print-artifact register; a soft
+ * gold wash sits where the chain catches light. Jewelry on the techwear.
  */
 interface Props {
   label: string;
 }
 const { label } = Astro.props;
 ---
-
-{/* duotone filter — luminance, then map the tonal range across 3 stops */}
-<svg width="0" height="0" aria-hidden="true" class="portrait-defs">
-  <filter id="jxn-duotone" color-interpolation-filters="sRGB">
-    <feColorMatrix
-      type="matrix"
-      values="0.33 0.33 0.33 0 0
-              0.33 0.33 0.33 0 0
-              0.33 0.33 0.33 0 0
-              0    0    0    1 0"
-    ></feColorMatrix>
-    <feComponentTransfer>
-      <!-- shadows #0a0a0c · mids ~teal · highlights cream #efe3c2 -->
-      <feFuncR type="table" tableValues="0.039 0.090 0.937"></feFuncR>
-      <feFuncG type="table" tableValues="0.039 0.520 0.890"></feFuncG>
-      <feFuncB type="table" tableValues="0.047 0.510 0.760"></feFuncB>
-    </feComponentTransfer>
-  </filter>
-</svg>
 
 <figure class="portrait reveal" aria-label={label}>
   <div class="portrait-frame">
@@ -47,6 +26,8 @@ const { label } = Astro.props;
       class="portrait-img"
       loading="lazy"
     />
+    <span class="portrait-tint" aria-hidden="true"></span>
+    <span class="portrait-shade" aria-hidden="true"></span>
     <span class="portrait-dots" aria-hidden="true"></span>
     <span class="portrait-scan" aria-hidden="true"></span>
     <span class="portrait-glint" aria-hidden="true"></span>
@@ -55,12 +36,6 @@ const { label } = Astro.props;
 </figure>
 
 <style>
-  .portrait-defs {
-    position: absolute;
-    width: 0;
-    height: 0;
-  }
-
   .portrait {
     position: relative;
     border: 1px solid var(--line-0);
@@ -85,14 +60,13 @@ const { label } = Astro.props;
     height: 100%;
     object-fit: cover;
     object-position: 50% 28%;
-    filter: url(#jxn-duotone) contrast(1.05);
-    /* starts "unresolved": desaturated, slightly soft, low — resolves on scroll */
+    filter: grayscale(1) contrast(1.1) brightness(1.04);
+    /* resolves on scroll: soft and zoomed → sharp and seated */
     opacity: 0.001;
     scale: 1.06;
     transition:
       opacity var(--beat) var(--ease-out),
-      scale var(--beat) var(--ease-out),
-      filter var(--beat) var(--ease-out);
+      scale var(--beat) var(--ease-out);
   }
 
   :global(.portrait.in) .portrait-img {
@@ -100,11 +74,32 @@ const { label } = Astro.props;
     scale: 1;
   }
 
-  /* halftone dot screen — the print artifact, in cream */
-  .portrait-dots {
+  /* the duotone ink: live accent, blended as color — follows side + mixer */
+  .portrait-tint {
     position: absolute;
     inset: 0;
     z-index: 2;
+    pointer-events: none;
+    background: var(--accent);
+    mix-blend-mode: color;
+  }
+
+  /* seat the shadows back into the page's near-black */
+  .portrait-shade {
+    position: absolute;
+    inset: 0;
+    z-index: 3;
+    pointer-events: none;
+    background: var(--bg-0);
+    mix-blend-mode: multiply;
+    opacity: 0.22;
+  }
+
+  /* halftone dot screen — the print artifact */
+  .portrait-dots {
+    position: absolute;
+    inset: 0;
+    z-index: 4;
     pointer-events: none;
     background-image: radial-gradient(
       color-mix(in oklab, var(--cream) 40%, transparent) 28%,
@@ -118,7 +113,7 @@ const { label } = Astro.props;
   .portrait-scan {
     position: absolute;
     inset: 0;
-    z-index: 3;
+    z-index: 5;
     pointer-events: none;
     background: repeating-linear-gradient(
       to bottom,
@@ -133,11 +128,11 @@ const { label } = Astro.props;
   .portrait-glint {
     position: absolute;
     inset: 0;
-    z-index: 4;
+    z-index: 6;
     pointer-events: none;
     background: radial-gradient(
       ellipse 38% 16% at 52% 82%,
-      color-mix(in oklab, var(--gold) 38%, transparent),
+      color-mix(in oklab, var(--gold) 42%, transparent),
       transparent 70%
     );
     mix-blend-mode: screen;

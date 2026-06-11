@@ -42,8 +42,9 @@ document.addEventListener("visibilitychange", () => {
   }
 });
 
-/* — header status link opens the modal instead of navigating ———————————— */
-function bindStatusLinks(): void {
+/* — in-page bindings (re-armed after every soft navigation) ————————————— */
+function bindPage(): void {
+  // header status link opens the modal instead of navigating
   document.querySelectorAll<HTMLAnchorElement>("a.js-status").forEach((a) => {
     if (a.dataset.bound) return;
     a.dataset.bound = "1";
@@ -52,9 +53,65 @@ function bindStatusLinks(): void {
       dispatchEvent(new CustomEvent("jxn:overlay", { detail: "status" }));
     });
   });
+
+  // contact: [ sudo hire-me ] opens the terminal and types for you
+  document.querySelectorAll<HTMLButtonElement>(".js-hire").forEach((b) => {
+    if (b.dataset.bound) return;
+    b.dataset.bound = "1";
+    b.addEventListener("click", () => {
+      dispatchEvent(new CustomEvent("jxn:term-run", { detail: "sudo hire-me" }));
+    });
+  });
+
+  // the souls card: go on. touch it.
+  document.querySelectorAll<HTMLElement>('[data-egg="souls"]').forEach((card) => {
+    if (card.dataset.bound) return;
+    card.dataset.bound = "1";
+    card.addEventListener("click", () => {
+      let died = document.getElementById("youdied");
+      if (!died) {
+        died = document.createElement("div");
+        died.id = "youdied";
+        died.setAttribute("aria-hidden", "true");
+        died.innerHTML = "<span>YOU DIED</span>";
+        document.body.appendChild(died);
+      }
+      died.classList.remove("show");
+      void died.offsetWidth; // restart the animation
+      died.classList.add("show");
+    });
+  });
+
+  // the d20: chaotic neutral, like the gnome
+  document.querySelectorAll<HTMLButtonElement>(".js-d20").forEach((btn) => {
+    if (btn.dataset.bound) return;
+    btn.dataset.bound = "1";
+    const label = btn.textContent ?? "roll d20";
+    btn.addEventListener("click", () => {
+      if (btn.classList.contains("rolling")) return;
+      btn.classList.add("rolling");
+      let ticks = 0;
+      const spin = window.setInterval(() => {
+        btn.textContent = String(1 + Math.floor(Math.random() * 20));
+        ticks += 1;
+        if (ticks >= 9) {
+          window.clearInterval(spin);
+          const roll = 1 + Math.floor(Math.random() * 20);
+          btn.textContent = `${label} → ${roll}`;
+          btn.classList.remove("rolling");
+          if (roll === 20) {
+            degauss();
+            toast("natural 20. gloria approves.");
+          } else if (roll === 1) {
+            toast("critical miss. gloria misfires.");
+          }
+        }
+      }, 70);
+    });
+  });
 }
-bindStatusLinks();
-document.addEventListener("astro:page-load", bindStatusLinks);
+bindPage();
+document.addEventListener("astro:page-load", bindPage);
 
 /* — typed sequences: konami + "boombap" ————————————————————————————————— */
 const KONAMI = [
