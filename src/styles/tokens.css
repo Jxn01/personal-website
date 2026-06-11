@@ -1,0 +1,87 @@
+/* ============================================================================
+   JXN-000 · DESIGN TOKENS
+   ----------------------------------------------------------------------------
+   Every color on the site resolves through a variable defined here. Swapping
+   the accent is a one-line change, never a refactor.
+
+   ┌─ PENDING DECISION ────────────────────────────────────────────────────┐
+   │ The ONE cold accent (--accent) and the champagne-gold jewelry tone     │
+   │ (--gold) are PLACEHOLDERS until Norbert's screenshots land. The values │
+   │ below are a neutral steel-phosphor holding pattern so the skeleton      │
+   │ reads as intentional — they are NOT the final palette. Do not treat     │
+   │ this as "the model chose." See docs/jxn-000-site-asset.md, Part 4 #6.   │
+   │ NO PURPLE.                                                              │
+   └────────────────────────────────────────────────────────────────────────┘
+   ========================================================================== */
+
+:root {
+  /* — near-black base (spec: #0a0a0c–#101014, never pure black) ———————————— */
+  --bg-0: #0a0a0c; /* deepest — page base */
+  --bg-1: #0d0d10; /* raised surfaces */
+  --bg-2: #101014; /* cards / sleeves */
+  --bg-3: #16161b; /* hover / inset */
+
+  /* — ink scale (text on dark) ———————————————————————————————————————————— */
+  --ink-0: #f4f4f6; /* primary text */
+  --ink-1: #c7c7cd; /* body */
+  --ink-2: #8a8a93; /* muted / metadata */
+  --ink-3: #55555d; /* faint labels, disabled */
+
+  /* — hairlines & texture ————————————————————————————————————————————————— */
+  --line-0: rgba(255, 255, 255, 0.08); /* 1px borders */
+  --line-1: rgba(255, 255, 255, 0.04); /* grid / scanline */
+  --grain: rgba(255, 255, 255, 0.015); /* paper-grain on sleeves */
+
+  /* — ACCENT (PLACEHOLDER — pending screenshots) ——————————————————————————— */
+  --accent: #5be0c8; /* steel-phosphor holding value — TBD */
+  --accent-dim: color-mix(in oklab, var(--accent) 55%, var(--bg-0));
+  --accent-glow: color-mix(in oklab, var(--accent) 40%, transparent);
+  --accent-ink: #07120f; /* text ON accent fills */
+
+  /* — GOLD (the jewelry — extremely sparing: catalog #s, link hover, hairline) */
+  --gold: #d8c08a; /* champagne — PLACEHOLDER, lock with accent */
+  --gold-dim: color-mix(in oklab, var(--gold) 60%, var(--bg-0));
+
+  /* — semantic roles ———————————————————————————————————————————————————————— */
+  --status-live: var(--accent);
+  --status-pending: var(--ink-2);
+
+  /* — type ————————————————————————————————————————————————————————————————— */
+  --font-display: "Space Grotesk Variable", "Space Grotesk", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono Variable", "JetBrains Mono", ui-monospace, monospace;
+
+  /* fluid type scale — hero wants to be enormous */
+  --step--1: clamp(0.78rem, 0.74rem + 0.2vw, 0.9rem);
+  --step-0: clamp(0.95rem, 0.9rem + 0.25vw, 1.05rem);
+  --step-1: clamp(1.2rem, 1.1rem + 0.5vw, 1.5rem);
+  --step-2: clamp(1.6rem, 1.4rem + 1vw, 2.4rem);
+  --step-3: clamp(2.2rem, 1.8rem + 2vw, 3.8rem);
+  --step-hero: clamp(3.5rem, 2rem + 12vw, 12rem);
+
+  /* — rhythm (90 BPM / boom-bap pocket — one beat = 666ms) ———————————————— */
+  --beat: 666ms;
+  --beat-half: 333ms;
+  --beat-quarter: 166ms;
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+
+  /* — layout ———————————————————————————————————————————————————————————————— */
+  --measure: 68ch; /* readable body width */
+  --gutter: clamp(1.25rem, 5vw, 6rem);
+  --maxw: 1320px;
+  --radius: 2px; /* technical, not soft — record sleeve corners */
+
+  --z-needle: 90; /* boot sequence */
+  --z-terminal: 80;
+  --z-header: 60;
+  --z-playhead: 50;
+}
+
+/* honor reduced-motion globally — needle drop, flip, shader all gate on this */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --beat: 0.001ms;
+    --beat-half: 0.001ms;
+    --beat-quarter: 0.001ms;
+  }
+}
