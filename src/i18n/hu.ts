@@ -25,15 +25,15 @@ export const hu: Dict = {
   hero: {
     name: "Oláh Norbert",
     headline: "Kódolok.",
-    body: "Ez a rövid verzió. A hosszabb: full-stack fejlesztő vagyok, olyan éles rendszereket építek és üzemeltetek, amiken emberek nap mint nap szó szerint átsétálnak — a React frontendtől a Linux szerverekig minden hozzám tartozik. Rendszerekben gondolkodom, akkor is működésre bírom a dolgokat, amikor épp minden ég, és simán elmegy egy órám arra, hogy egy gombot jó érzés legyen megnyomni.",
+    body: "Ez a rövid verzió. A hosszabb: full-stack fejlesztő vagyok, olyan éles rendszereket építek és üzemeltetek, amiken emberek nap mint nap szó szerint átsétálnak — a React frontendtől a Linux szerverekig minden hozzám tartozik. Rendszerekben gondolkodom, akkor is összerakom a dolgokat, amikor épp minden ég körülöttem, és simán rámegy egy órám arra, hogy egy gombot jó érzés legyen megnyomni.",
     ctas: { work: "munkáim ↓", github: "github →", contact: "kapcsolat →" },
     micro: "épp beléptetőrendszereket tartok életben országszerte.",
   },
   about: {
     title: "RÓLAM",
     paras: [
-      "Norbert vagyok, full-stack fejlesztő Budapesten. Napközben az <strong>EverLinken</strong> dolgozom — ez egy beléptető- és parkolórendszer-platform, több száz telepítéssel országszerte; a legnagyobb rendszer több ezer kártyás felhasználót szolgál ki. Az én terepem a kliens és minden, ami hozzá ér: a React/TypeScript frontend, a mögötte futó Laravel backend, a realtime réteg — és jut bőven a szerveroldali tűzoltásból is, amikor a production úgy dönt, hogy ma véleménye van.",
-      "2024-ben végeztem az ELTE programtervező informatikus szakán — vagyis két éve fizetnek azért, amit jóval régebb óta csinálok. Az egyetem irgalmatlan mennyiségű nyelvet nyomott a kezembe C-től Haskellen át Agdáig, de a tanulság nem egy konkrét nyelv volt. Hanem az, hogy minden rendszer — és minden rendszer megérthető.",
+      "Norbert vagyok, full-stack fejlesztő Budapesten. Napközben az <strong>EverLinken</strong> dolgozom — ez egy beléptető- és parkolórendszer-platform, több száz telepítéssel országszerte; a legnagyobb rendszer több ezer kártyás felhasználót szolgál ki. Az én terepem a kliensoldal és minden, ami köré épül: a React/TypeScript frontend, a mögötte futó Laravel backend, a realtime réteg — és jut bőven a szerveroldali tűzoltásból is, amikor a production úgy dönt, hogy ma véleménye van.",
+      "2024-ben végeztem az ELTE programtervező informatikus szakán — vagyis két éve fizetnek azért, amit jóval régebb óta csinálok. Az egyetem irgalmatlan mennyiségű nyelvet nyomott a kezembe C-től Haskellen át Agdáig, de a lényeg végül nem egy-egy nyelv volt. Hanem hogy minden csak rendszer — és minden rendszer megérthető.",
       "Ami igazán hajt: előbb <em>működjön</em>, aztán legyen <em>jó</em> is. Én vagyok az, aki megjavítja az éles hibát, este meg azt az animációt csiszolgatja a frontenden, amit senki nem kért. A kettő együtt ér valamit: az egyik életben tartja a rendszert, a másik miatt élmény használni.",
       "Amikor nem a billentyűzetnél ülök… na jó, olyankor is általában a billentyűzetnél ülök, csak épp egy másiknál. Lentebb kiderül.",
     ],
@@ -45,7 +45,7 @@ export const hu: Dict = {
     dates: "2024 → jelenleg · Budapest",
     intro:
       "Az EverLink beléptető- és parkolórendszereket épít — fizikai infrastruktúrát, szoftveres aggyal. Kártyaolvasók, sorompók, kioszkok, és a platform, ami az egészet összefogja. Kis cég: védőháló nincs, „majd valaki más” sincs. Ami a tiéd, azért te felelsz.",
-    domainsLead: "Az én pályám a kliensoldal és minden, ami hozzá tartozik:",
+    domainsLead: "Az én asztalom a kliensoldal és minden, ami hozzá tartozik:",
     domains: [
       {
         label: "Frontend",
@@ -65,12 +65,12 @@ export const hu: Dict = {
       {
         id: "FN-01",
         title: "Mentés, élesben.",
-        body: "Helyszíni telepítés egy új ügyfélnél; a deploy közepén a rendszer látványosan összeomlott — az ügyfél szeme láttára, egy olyan céges laptopon, ami már egy böngészőtől is megizzad. Ott helyben, élesben derítettem fel és javítottam a hibát, miközben körülöttem zajlott tovább a telepítés. Semmiből nem tanulsz gyorsabban stacket, mint közönség előtt debugolva. Működő rendszerrel jöttünk el.",
+        body: "Helyszíni telepítés egy új ügyfélnél; a deploy közepén a rendszer látványosan összeomlott — az ügyfél szeme láttára, egy olyan céges laptopon, aminek már egy böngésző is sok. Ott helyben, élesben derítettem fel és javítottam a hibát, miközben körülöttem zajlott tovább a telepítés. Semmiből nem tanulsz gyorsabban stacket, mint közönség előtt debugolva. Működő rendszerrel jöttünk el.",
       },
       {
         id: "FN-02",
         title: "A 970 fájlos refaktor.",
-        body: "Egy nagy Laravel kódbázis kinőtte a saját struktúráját — és ~970 PHP fájlt kézzel átpakolni a legbiztosabb recept ezer apró bugra. Inkább az IDE szkriptelhető refaktor-API-jával vezényeltem le az egészet, így minden áthelyezés atomian frissített minden hivatkozást. Nagy, ijesztő és unalmas — pont az a fajta meló, amit vagy automatizálsz, vagy bele se kezdesz.",
+        body: "Egy nagy Laravel kódbázis kinőtte a saját struktúráját — és ~970 PHP fájlt kézzel átpakolni a legbiztosabb recept ezer apró bugra. Inkább az IDE szkriptelhető refaktor-API-jával vezényeltem le az egészet, így minden áthelyezésnél egyben frissült az összes hivatkozás is. Nagy, ijesztő és unalmas — pont az a fajta meló, amit vagy automatizálsz, vagy bele se kezdesz.",
       },
       {
         id: "FN-03",
@@ -80,7 +80,7 @@ export const hu: Dict = {
       {
         id: "FN-04",
         title: "Infrastruktúra-tűzoltás.",
-        body: "Félrekonfigurált Apache MPM; adatbázis, ami reboot után azért nem indult el, mert egy runtime könyvtár nem élte túl az újraindítást; custom systemd unitok, amiknek tényleg service-ként illett volna viselkedniük. Az a fajta probléma, amiből sosem lesz portfólió-screenshot — csak egy rendszer, ami azóta állva marad.",
+        body: "Félrekonfigurált Apache MPM; adatbázis, ami reboot után azért nem indult el, mert egy runtime könyvtár nem élte túl az újraindítást; custom systemd unitok, amiket meg kellett tanítani rendes service-ként viselkedni. Az a fajta probléma, amiből sosem lesz portfólió-screenshot — csak egy rendszer, ami azóta állva marad.",
       },
     ],
   },
@@ -93,7 +93,7 @@ export const hu: Dict = {
         stack: "Python · Home Assistant · Matter",
         github: "https://github.com/Jxn01/matterlights",
         paras: [
-          "Valós idejű képernyő–fény szinkron Matter-izzókra, Home Assistanten keresztül — a SignalRGB-élmény kiterjesztve oda, ahová a SignalRGB nem ér el. Élőben mintavételezi a képernyőt, egy helyi dashboardon zónákat rendelsz az izzókhoz, a színek pedig a helyi hálózaton mennek ki a lámpákig.",
+          "Valós idejű képernyő–fény szinkron Matter-izzókra, Home Assistanten keresztül — a SignalRGB-élmény kiterjesztve oda, ahová a SignalRGB nem ér el. Valós időben mintavételezi a képernyőt, egy helyi dashboardon zónákat rendelsz az izzókhoz, a színek pedig a helyi hálózaton mennek ki a lámpákig.",
           "Abból született, hogy a setupom többi része együtt világított a képernyővel, a plafon viszont nem — és ezt nem bírtam annyiban hagyni. Fájdalmasan specifikus, kicsit abszurd, és működik.",
           "És hogy őszinte legyek — mert inkább elmondom, mint hogy találgatnod kelljen: ez a projekt szinte végig AI-asszisztált fejlesztéssel készült. Nem vagyok Python-fejlesztő, de az architektúra az enyém, pontosan tudom, melyik komponens mit csinál és miért, és minden döntést én hoztam. Hogy ez szerintem mit jelent, arról a 06-os track szól.",
         ],
@@ -106,7 +106,7 @@ export const hu: Dict = {
         paras: [
           "Lightweight, moduláris, SEO-first CMS, vanilla PHP-ban. Se framework, se build step, se akkora dependency-fa, amit külön monitorozni kéne.",
           "Az origin story jobb, mint az elevator pitch: egy (nem fejlesztő) kollégának kellett egy weboldal, amit <em>nélkülem</em> is karban tud tartani — és pontosan egy darab hostingja volt: egy meglévő WordPress-szerver, amit nem akart fizetős VPS-re cserélni. Úgyhogy az egész úgy készült, hogy egy WordPress-host keretei közt is elférjen: vanilla PHP, bemásolod és megy, nulla extra szerverigény.",
-          "Egyben a csendes bizonyíték is, hogy értem, mit csinálnak a frameworkök a motorháztető alatt. A Laravel fizeti a számlákat; ez mutatja meg, hogy azt is tudom, <em>miért</em>.",
+          "Egyben csendes bizonyíték is arra, hogy értem, mit csinálnak a frameworkök a motorháztető alatt. A Laravel fizeti a számlákat; ez mutatja meg, hogy azt is tudom, <em>miért</em>.",
         ],
         status: "[STÁTUSZ: élő demó hamarosan — saját hoszting]",
       },
@@ -116,7 +116,7 @@ export const hu: Dict = {
         stack: "Laravel · PHP",
         github: "https://github.com/Jxn01/algoritmizator",
         paras: [
-          "Gamifikált webes platform algoritmusok és adatszerkezetek tanulásához. A BSc-szakdolgozatom — és az a projekt, amin megtanultam full-stack webfejleszteni, mert amikor nekiálltam, még nem tudtam. Választottam témát, választottam stacket, a tananyagot meg írta a kényszer. A kódbázison látszik, ahogy egy fejlesztő élő adásban összerakja magát — és ezt direkt hagytam így.",
+          "Gamifikált webes platform algoritmusok és adatszerkezetek tanulásához. A BSc-szakdolgozatom — és az a projekt, amin megtanultam full-stack webfejleszteni, mert amikor nekiálltam, még nem tudtam. Választottam témát, választottam stacket, a tananyagot meg diktálta a szükség. A kódbázison látszik, ahogy egy fejlesztő élő adásban összerakja magát — és ezt direkt hagytam így.",
         ],
         status: "[STÁTUSZ: élő demó hamarosan — saját hoszting]",
       },
@@ -165,7 +165,7 @@ export const hu: Dict = {
       "Nap mint nap fejlesztek AI-agentekkel, és erről inkább beszélek nyíltan, mint hogy úgy csináljak, mintha nem így lenne.",
       "Az álláspontom: <strong>az AI-asszisztált fejlesztés egy skill — és ez a skill nem a promptírás, hanem az architektúra.</strong> Kontextusmenedzsment; annak ismerete, hogy mit lehet egy modellre rábízni és mit nem; a probléma ellenőrizhető darabokra bontása; az output kritikus olvasása; és a rendszer olyan mély értése, hogy kiszúrd, amikor a modell magabiztosan téved. Kódot kérni bárki tud. Tudni, hogy <em>mit kérj, milyen sorrendben, milyen megkötésekkel, és hogyan ellenőrizd</em> — az a szakma.",
       "A saját stackemben — Laravel, React, TypeScript — minden sort elolvasok és értek, ami élesbe megy. Az agent gyorsít; a tervezés és az ellenőrzés az enyém. A stackemen kívül meg kimondom őszintén: a matterlights szinte teljes egészében agentic fejlesztéssel készült, olyan nyelven, amit nem írok folyékonyan. A rendszert akkor is én terveztem, tudom, mit csinál minden komponense, és minden architekturális döntés az enyém volt. Amit nem csináltam: nem kézzel írtam a Pythont. Az eredmény viszont egy működő termék, amire enélkül sosem fért volna bele az időmbe.",
-      "Amiben viszont <em>nem</em> hiszek: beírni a promptba, hogy „ne hibázz”, és várni a bugmentes kódot. A modell az ítélőképesség erősítője. Ha nulla ítélőképességet szorzol fel, nagyon gyors nullát kapsz.",
+      "Amiben viszont <em>nem</em> hiszek: beírni a promptba, hogy „ne hibázz”, és várni a bugmentes kódot. A modell az ítélőképességet sokszorozza. A nulla viszont bármivel szorozva is nulla marad — legfeljebb gyorsabban lesz az.",
       "A toolchain, ha valakit érdekel: Claude Code és Cursor napi szinten, több modellszolgáltató, feladattól függően. Otthon saját vason futnak a helyi modellek — Open WebUI a chat-workflow-khoz, ComfyUI képhez és videóhoz —, mert egy eszköz korlátait úgy ismered meg igazán, ha magad üzemelteted.",
     ],
   },
@@ -277,7 +277,7 @@ export const hu: Dict = {
     body: "Találtál valami érdekeset? Nem értesz egyet a stack-tierekkel? Érdekel, hogy halad a számológép? (Lassan.)",
     emailLabel: "Email",
     emailPlaceholder: "[PLACEHOLDER — email]",
-    closing: "Aktívan nem keresek munkát — de az érdekes problémák kapják az első választ.",
+    closing: "Aktívan nem keresek munkát — de az érdekes problémák nálam mindig sorban elöl vannak.",
   },
   footer: {
     lines: [
