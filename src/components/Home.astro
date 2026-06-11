@@ -1,0 +1,452 @@
+---
+import Base from "@/layouts/Base.astro";
+import Header from "@/components/Header.astro";
+import Footer from "@/components/Footer.astro";
+import Waveform from "@/components/Waveform.astro";
+import Playhead from "@/components/Playhead.astro";
+import AsciiHero from "@/islands/AsciiHero";
+import Terminal from "@/islands/Terminal";
+import type { Locale } from "@/i18n";
+import { getDict, mmss, readingSeconds, trackNo } from "@/i18n";
+import { config } from "@/config";
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const d = getDict(locale);
+
+// per-track durations, computed from the actual copy — the tracklist is honest
+const secs = [
+  readingSeconds([d.hero.body]),
+  readingSeconds(d.about.paras),
+  readingSeconds([
+    d.experience.intro,
+    ...d.experience.domains.map((x) => x.body),
+    ...d.experience.fieldNotes.map((n) => n.body),
+  ]),
+  readingSeconds(d.featured.projects.flatMap((p) => p.paras)),
+  readingSeconds([...d.more.projects.map((p) => p.body), ...d.more.lab.map((l) => l.body)]),
+  readingSeconds(d.ai.paras),
+  readingSeconds(d.stack.tiers.flatMap((t) => [t.intro, t.items.join(" ")])),
+  readingSeconds(d.offclock.items.map((i) => i.body)),
+  readingSeconds(d.now.items),
+  readingSeconds([d.contact.body]),
+];
+
+const game =
+  config.currentGame ?? (locale === "en" ? "[CURRENT GAME]" : "[AKTUÁLIS JÁTÉK]");
+const nowDate = config.nowUpdated ?? (locale === "en" ? "[DATE]" : "[DÁTUM]");
+
+const track = (i: number) => ({
+  "data-track": "",
+  "data-no": trackNo(i),
+  "data-title": d.tracks.titles[i],
+  "data-secs": String(secs[i]),
+  id: `t${trackNo(i)}`,
+});
+
+const catalogNote = (cat: string) => `cat. no. ${cat} — from the crate`;
+---
+
+<Base locale={locale}>
+  <Header locale={locale} />
+
+  <main id="main">
+    {/* ——— 01 · INTRO ——————————————————————————————————————————————— */}
+    <section class="hero crt" {...track(0)}>
+      <AsciiHero client:load />
+      <div class="container hero-inner">
+        <p class="hero-name">{trackNo(0)} — {d.hero.name}</p>
+        <h1>{d.hero.headline}</h1>
+        <p class="hero-body">{d.hero.body}</p>
+        <div class="hero-ctas">
+          <a class="bracket" href="#t04">{d.hero.ctas.work}</a>
+          <a class="bracket" href={config.links.github} rel="me">{d.hero.ctas.github}</a>
+          <a class="bracket" href="#t10">{d.hero.ctas.contact}</a>
+        </div>
+        <p class="hero-micro">{d.hero.micro}</p>
+      </div>
+    </section>
+
+    <div class="container"><Waveform seed={1} /></div>
+
+    {/* ——— 02 · ABOUT ——————————————————————————————————————————————— */}
+    <section class="container track" {...track(1)}>
+      <div class="track-head reveal">
+        <span class="no">{trackNo(1)}</span>
+        <h2>{d.about.title}</h2>
+        <span class="dur">{mmss(secs[1] ?? 0)}</span>
+      </div>
+      <div class="about-grid">
+        <div class="reveal">
+          {d.about.paras.map((p) => <p set:html={p} />)}
+        </div>
+        <figure class="portrait reveal" aria-label={d.ui.portraitLabel}>
+          <figcaption class="stamp">{d.ui.portraitLabel}</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <div class="container"><Waveform seed={2} /></div>
+
+    {/* ——— 03 · EXPERIENCE —————————————————————————————————————————— */}
+    <section class="container track" {...track(2)}>
+      <div class="track-head reveal">
+        <span class="no">{trackNo(2)}</span>
+        <h2>{d.experience.title}</h2>
+        <span class="dur">{mmss(secs[2] ?? 0)}</span>
+      </div>
+
+      <div class="xp-head reveal">
+        <h3>{d.experience.role} — {d.experience.org}</h3>
+        <p class="label">{d.experience.dates}</p>
+      </div>
+      <p class="reveal" set:html={d.experience.intro} />
+      <p class="reveal">{d.experience.domainsLead}</p>
+      <ul class="xp-domains reveal">
+        {
+          d.experience.domains.map((dom) => (
+            <li>
+              <strong>{dom.label}:</strong> <span set:html={dom.body} />
+            </li>
+          ))
+        }
+      </ul>
+
+      <h3 class="fn-head label reveal">{d.experience.fieldNotesTitle}</h3>
+      <div class="reveal">
+        {
+          d.experience.fieldNotes.map((n) => (
+            <details class="fieldnote">
+              <summary>
+                <span class="fn-id">{n.id}</span>
+                <span class="fn-title">{n.title}</span>
+                <span class="fn-mark">+</span>
+              </summary>
+              <div class="fn-body">
+                <p>{n.body}</p>
+              </div>
+            </details>
+          ))
+        }
+      </div>
+    </section>
+
+    <div class="container"><Waveform seed={3} /></div>
+
+    {/* ——— 04 · FEATURED PROJECTS ——————————————————————————————————— */}
+    <section class="container track" {...track(3)}>
+      <div class="track-head reveal">
+        <span class="no">{trackNo(3)}</span>
+        <h2>{d.featured.title}</h2>
+        <span class="dur">{mmss(secs[3] ?? 0)}</span>
+      </div>
+      <div class="featured-stack">
+        {
+          d.featured.projects.map((p, i) => (
+            <article class="sleeve reveal" style={`--i: ${i}`}>
+              <header class="proj-head">
+                <span class="catalog" tabindex="0" data-note={catalogNote(p.catalog)}>
+                  {p.catalog}
+                </span>
+                <h3>{p.name}</h3>
+                <a class="bracket proj-gh" href={p.github}>github →</a>
+              </header>
+              <p class="label proj-stack">{p.stack}</p>
+              {p.paras.map((para) => (
+                <p set:html={para} />
+              ))}
+              {p.status && <p class="stamp">{p.status}</p>}
+            </article>
+          ))
+        }
+      </div>
+    </section>
+
+    <div class="container"><Waveform seed={4} /></div>
+
+    {/* ——— 05 · MORE PROJECTS ——————————————————————————————————————— */}
+    <section class="container track" {...track(4)}>
+      <div class="track-head reveal">
+        <span class="no">{trackNo(4)}</span>
+        <h2>{d.more.title}</h2>
+        <span class="dur">{mmss(secs[4] ?? 0)}</span>
+      </div>
+      <div class="more-grid">
+        {
+          d.more.projects.map((p, i) => (
+            <article class="sleeve reveal" style={`--i: ${i}`}>
+              <header class="proj-head">
+                <span class="catalog" tabindex="0" data-note={catalogNote(p.catalog)}>
+                  {p.catalog}
+                </span>
+                <h3>{p.name}</h3>
+                <a class="bracket proj-gh" href={p.github}>github →</a>
+              </header>
+              <p class="label proj-stack">{p.stack}</p>
+              <p set:html={p.body} />
+            </article>
+          ))
+        }
+      </div>
+
+      <h3 class="label lab-head reveal">{d.more.labTitle}</h3>
+      <div class="lab-strip reveal">
+        {
+          d.more.lab.map((item) => (
+            <div class="lab-item">
+              <strong>{item.name}</strong> <span set:html={item.body} />
+            </div>
+          ))
+        }
+      </div>
+    </section>
+
+    <div class="container"><Waveform seed={5} /></div>
+
+    {/* ——— 06 · AI —————————————————————————————————————————————————— */}
+    <section class="container track" {...track(5)}>
+      <div class="track-head reveal">
+        <span class="no">{trackNo(5)}</span>
+        <h2>{d.ai.title}</h2>
+        <span class="dur">{mmss(secs[5] ?? 0)}</span>
+      </div>
+      <div class="reveal">
+        {d.ai.paras.map((p) => <p set:html={p} />)}
+      </div>
+    </section>
+
+    <div class="container"><Waveform seed={6} /></div>
+
+    {/* ——— 07 · STACK ——————————————————————————————————————————————— */}
+    <section class="container track" {...track(6)}>
+      <div class="track-head reveal">
+        <span class="no">{trackNo(6)}</span>
+        <h2>{d.stack.title}</h2>
+        <span class="dur">{mmss(secs[6] ?? 0)}</span>
+      </div>
+      {
+        d.stack.tiers.map((tier) => (
+          <div class="tier reveal">
+            <h3>{tier.name}</h3>
+            <p class="tier-intro" set:html={tier.intro} />
+            <ul>
+              {tier.items.map((item) => (
+                <li>{item}</li>
+              ))}
+            </ul>
+          </div>
+        ))
+      }
+      <p class="stack-closing reveal"><em set:html={d.stack.closing} /></p>
+    </section>
+
+    <div class="container"><Waveform seed={7} /></div>
+
+    {/* ——— 08 · OFF THE CLOCK ——————————————————————————————————————— */}
+    <section class="container track" {...track(7)}>
+      <div class="track-head reveal">
+        <span class="no">{trackNo(7)}</span>
+        <h2>{d.offclock.title}</h2>
+        <span class="dur">{mmss(secs[7] ?? 0)}</span>
+      </div>
+      <div class="offclock-grid">
+        {
+          d.offclock.items.map((item, i) => (
+            <div class="sleeve reveal" style={`--i: ${i % 3}`}>
+              <h3>{item.label}</h3>
+              <p set:html={item.body} />
+            </div>
+          ))
+        }
+      </div>
+    </section>
+
+    <div class="container"><Waveform seed={8} /></div>
+
+    {/* ——— 09 · NOW ————————————————————————————————————————————————— */}
+    <section class="container track" {...track(8)}>
+      <div class="track-head reveal">
+        <span class="no">{trackNo(8)}</span>
+        <h2>{d.now.title}</h2>
+        <span class="dur">{mmss(secs[8] ?? 0)}</span>
+      </div>
+      <p class="reveal"><strong>{d.now.lead}</strong></p>
+      <ul class="now-list reveal">
+        {d.now.items.map((item) => <li>{item.replace("%GAME%", game)}</li>)}
+      </ul>
+      <p class="label reveal">{d.now.lastUpdatedLabel} {nowDate}</p>
+    </section>
+
+    <div class="container"><Waveform seed={9} /></div>
+
+    {/* ——— 10 · CONTACT ————————————————————————————————————————————— */}
+    <section class="container track" {...track(9)}>
+      <div class="track-head reveal">
+        <span class="no">{trackNo(9)}</span>
+        <h2>{d.contact.title}</h2>
+        <span class="dur">{mmss(secs[9] ?? 0)}</span>
+      </div>
+      <p class="contact-lead reveal"><strong>{d.contact.lead}</strong></p>
+      <p class="reveal">{d.contact.body}</p>
+      <ul class="contact-list reveal">
+        <li>
+          <span class="label">{d.contact.emailLabel}:</span>{" "}
+          {
+            config.email ? (
+              <a href={`mailto:${config.email}`}>{config.email}</a>
+            ) : (
+              <span class="stamp">{d.contact.emailPlaceholder}</span>
+            )
+          }
+        </li>
+        <li>
+          <span class="label">GitHub:</span>{" "}
+          <a href={config.links.github} rel="me">github.com/Jxn01</a>
+        </li>
+        <li>
+          <span class="label">LinkedIn:</span>{" "}
+          <a href={config.links.linkedin} rel="me">linkedin.com/in/jxn01</a>
+        </li>
+      </ul>
+      <p class="reveal"><em>{d.contact.closing}</em></p>
+    </section>
+  </main>
+
+  <Footer locale={locale} />
+  <Playhead />
+  <Terminal client:idle />
+
+  {/* reveal-on-scroll — the 666ms grid */}
+  <script>
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const e of entries) {
+          if (e.isIntersecting) {
+            e.target.classList.add("in");
+            io.unobserve(e.target);
+          }
+        }
+      },
+      { threshold: 0.12 },
+    );
+    document.querySelectorAll(".reveal").forEach((el) => io.observe(el));
+  </script>
+</Base>
+
+<style>
+  .about-grid {
+    display: grid;
+    grid-template-columns: minmax(0, var(--measure)) minmax(220px, 320px);
+    gap: clamp(1.5rem, 4vw, 4rem);
+    align-items: start;
+  }
+
+  @media (max-width: 840px) {
+    .about-grid {
+      grid-template-columns: 1fr;
+    }
+    .about-grid .portrait {
+      max-width: 320px;
+    }
+  }
+
+  .xp-head h3 {
+    font-size: var(--step-1);
+  }
+
+  .xp-head {
+    margin-bottom: 1.2rem;
+  }
+
+  .xp-domains {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 2.2rem;
+    max-width: var(--measure);
+    display: grid;
+    gap: 0.7rem;
+  }
+
+  .xp-domains li {
+    border-left: 1px solid var(--accent-faint);
+    padding-left: 1rem;
+  }
+
+  .fn-head {
+    margin: 0 0 0.8rem;
+  }
+
+  .featured-stack {
+    display: grid;
+    gap: 1rem;
+  }
+
+  .proj-head {
+    display: flex;
+    align-items: baseline;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .proj-head h3 {
+    font-size: var(--step-1);
+  }
+
+  .proj-gh {
+    margin-left: auto;
+  }
+
+  .proj-stack {
+    margin: 0.4rem 0 1rem;
+  }
+
+  .more-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1rem;
+  }
+
+  .more-grid p:last-child {
+    margin-bottom: 0;
+    font-size: var(--step--1);
+  }
+
+  .lab-head {
+    margin: 2.4rem 0 0.8rem;
+  }
+
+  .lab-strip {
+    display: grid;
+    gap: 0.6rem;
+    max-width: var(--measure);
+    border-left: 1px solid var(--accent-faint);
+    padding-left: 1rem;
+  }
+
+  .stack-closing {
+    margin-top: 1.6rem;
+    color: var(--ink-2);
+  }
+
+  .now-list,
+  .contact-list {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 1.4rem;
+    display: grid;
+    gap: 0.5rem;
+    max-width: var(--measure);
+  }
+
+  .now-list li::before {
+    content: "▸ ";
+    color: var(--accent);
+  }
+
+  .contact-lead {
+    font-size: var(--step-1);
+  }
+</style>

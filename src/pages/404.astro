@@ -1,0 +1,230 @@
+---
+import Base from "@/layouts/Base.astro";
+
+/**
+ * TRACK NOT FOUND. The only red on the site — red is a system state,
+ * and the system has a state. OK and NO both go home. There is no no.
+ */
+
+// background hex noise, generated at build — the bytes spell nothing. probably.
+function hexRows(rows: number, cols: number): string {
+  let s = 0x404;
+  const rand = () => {
+    s = (s * 1103515245 + 12345) & 0x7fffffff;
+    return s / 0x7fffffff;
+  };
+  return Array.from({ length: rows }, () =>
+    Array.from({ length: cols }, () =>
+      Math.floor(rand() * 256).toString(16).padStart(2, "0"),
+    ).join(" "),
+  ).join("\n");
+}
+
+const hex = hexRows(48, 24);
+---
+
+<Base
+  locale="en"
+  title="404 — TRACK NOT FOUND · JXN-000"
+  description="This groove doesn't exist."
+  variant="error"
+>
+  <main id="main" class="err-stage">
+    <pre class="err-hex" aria-hidden="true">{hex}</pre>
+    <div class="err-echo" aria-hidden="true">404 404 404</div>
+
+    <div class="err-cascade" aria-hidden="true">
+      {[5, 4, 3, 2, 1].map((i) => <div class="err-ghost" style={`--g: ${i}`} />)}
+    </div>
+
+    <div class="window err-dialog" role="alertdialog" aria-labelledby="err-title">
+      <div class="window-bar err-bar">
+        <span id="err-title">ERROR — TRACK NOT FOUND</span>
+        <span class="win-controls"><span>×</span></span>
+      </div>
+      <div class="err-body">
+        <div class="err-code glitch" data-text="404">404</div>
+        <p class="err-msg">
+          the needle skipped. this groove doesn't exist.<br />
+          <span class="err-msg-hu">a tű megugrott. ez a barázda nem létezik.</span>
+        </p>
+        <div class="err-actions">
+          <a class="err-btn" href="/en">OK</a>
+          <a class="err-btn" href="/en" title="there is no no.">NO</a>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <style>
+    .err-stage {
+      min-height: 100svh;
+      display: grid;
+      place-items: center;
+      position: relative;
+      overflow: hidden;
+      padding: var(--gutter);
+    }
+
+    /* scrolling hex dump, barely there */
+    .err-hex {
+      position: absolute;
+      inset: -50% auto auto 50%;
+      translate: -50% 0;
+      margin: 0;
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      line-height: 1.6;
+      color: var(--error);
+      opacity: 0.09;
+      animation: hex-crawl 60s linear infinite;
+      pointer-events: none;
+      user-select: none;
+    }
+
+    @keyframes hex-crawl {
+      to {
+        translate: -50% 25%;
+      }
+    }
+
+    .err-echo {
+      position: absolute;
+      inset: auto 0 4vh 0;
+      text-align: center;
+      font-size: clamp(4rem, 18vw, 14rem);
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      color: color-mix(in oklab, var(--error) 7%, transparent);
+      white-space: nowrap;
+      pointer-events: none;
+      user-select: none;
+    }
+
+    /* the cascading window trail */
+    .err-cascade {
+      position: absolute;
+    }
+
+    .err-ghost {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: min(460px, 80vw);
+      height: 240px;
+      border: 1px solid color-mix(in oklab, var(--error) calc(8% * var(--g)), transparent);
+      background: color-mix(in oklab, var(--bg-1) 60%, transparent);
+      /* trail up-left behind the dialog, centered on the same anchor */
+      translate: calc(-50% - var(--g) * 14px) calc(-50% - var(--g) * 12px);
+      border-radius: 4px;
+    }
+
+    .err-dialog {
+      position: relative;
+      width: min(460px, 86vw);
+      border-color: color-mix(in oklab, var(--error) 55%, var(--line-0));
+      animation: err-jitter 6s steps(1) infinite;
+    }
+
+    .err-bar {
+      color: var(--error);
+      border-bottom-color: color-mix(in oklab, var(--error) 35%, var(--line-0));
+    }
+
+    .err-body {
+      padding: 1.6rem;
+      text-align: center;
+    }
+
+    .err-code {
+      font-family: var(--font-mono);
+      font-size: clamp(4rem, 14vw, 7rem);
+      font-weight: 700;
+      color: var(--error);
+      line-height: 1;
+      position: relative;
+    }
+
+    /* glitch slices */
+    .glitch::before,
+    .glitch::after {
+      content: attr(data-text);
+      position: absolute;
+      inset: 0;
+      opacity: 0.75;
+      pointer-events: none;
+    }
+
+    .glitch::before {
+      color: color-mix(in oklab, var(--error) 70%, var(--cream));
+      clip-path: inset(18% 0 64% 0);
+      animation: glitch-a 3.2s steps(2) infinite;
+    }
+
+    .glitch::after {
+      color: color-mix(in oklab, var(--error) 55%, var(--bg-0));
+      clip-path: inset(66% 0 8% 0);
+      animation: glitch-b 2.7s steps(2) infinite;
+    }
+
+    @keyframes glitch-a {
+      0%, 88%, 100% { translate: 0 0; }
+      90% { translate: 4px 0; }
+      94% { translate: -3px 0; }
+    }
+
+    @keyframes glitch-b {
+      0%, 84%, 100% { translate: 0 0; }
+      86% { translate: -5px 0; }
+      92% { translate: 2px 0; }
+    }
+
+    @keyframes err-jitter {
+      0%, 96%, 100% { translate: 0 0; }
+      97% { translate: 2px -1px; }
+      98% { translate: -2px 1px; }
+    }
+
+    .err-msg {
+      font-family: var(--font-mono);
+      font-size: var(--step--1);
+      color: var(--ink-1);
+      margin: 1.2rem 0 1.6rem;
+      max-width: none;
+    }
+
+    .err-msg-hu {
+      color: var(--ink-3);
+    }
+
+    .err-actions {
+      display: flex;
+      gap: 0.8rem;
+      justify-content: center;
+    }
+
+    .err-btn {
+      font-family: var(--font-mono);
+      font-size: var(--step--1);
+      color: var(--error);
+      border: 1px solid color-mix(in oklab, var(--error) 50%, transparent);
+      padding: 0.4rem 1.6rem;
+      text-decoration: none;
+      border-radius: var(--radius);
+    }
+
+    .err-btn:hover {
+      background: var(--error);
+      color: var(--bg-0);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .err-hex,
+      .err-dialog,
+      .glitch::before,
+      .glitch::after {
+        animation: none;
+      }
+    }
+  </style>
+</Base>

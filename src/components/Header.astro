@@ -1,0 +1,63 @@
+---
+import type { Locale } from "@/i18n";
+import { getDict, otherLocale } from "@/i18n";
+
+interface Props {
+  locale: Locale;
+  /** Path suffix after the locale (e.g. "" for home), used by the toggle. */
+  path?: string;
+}
+
+const { locale, path = "" } = Astro.props;
+const dict = getDict(locale);
+const other = otherLocale(locale);
+const sides: { side: "A" | "B"; locale: Locale }[] = [
+  { side: "A", locale: "en" },
+  { side: "B", locale: "hu" },
+];
+---
+
+<header class="site-head">
+  <div class="container bar">
+    <a
+      class="catalog"
+      href={`/${locale}${path}`}
+      data-note={"cat. no. JXN-000 — this site"}
+      aria-label="JXN-000 — home"
+    >
+      JXN-000
+    </a>
+    <a class="mono head-status" href="/status">{dict.ui.statusLink}</a>
+
+    {/* A-side / B-side. The single best joke on the site. No explanation. */}
+    <nav class="side-toggle" aria-label={dict.ui.sideTooltip} title={dict.ui.sideTooltip}>
+      {
+        sides.map((s) =>
+          s.locale === locale ? (
+            <span aria-current="true">SIDE {s.side}</span>
+          ) : (
+            <a href={`/${other}${path}`} hreflang={other} lang={other}>
+              SIDE {s.side}
+            </a>
+          ),
+        )
+      }
+    </nav>
+  </div>
+</header>
+
+<style>
+  .head-status {
+    color: var(--ink-3);
+    text-decoration: none;
+  }
+  .head-status:hover {
+    color: var(--gold);
+  }
+  .head-status::before {
+    content: "● ";
+    color: var(--status-live);
+    font-size: 0.6em;
+    vertical-align: 0.2em;
+  }
+</style>

@@ -1,0 +1,139 @@
+---
+import Base from "@/layouts/Base.astro";
+import Header from "@/components/Header.astro";
+import Footer from "@/components/Footer.astro";
+import { config } from "@/config";
+
+/**
+ * The engine room. Build facts, live uptime, the design tokens — and the
+ * tree. The tree is seeded by the site's age in weeks: it is genuinely
+ * bigger next month. Machines speak English; this page does too.
+ */
+const built = new Date(__BUILD_TIME__);
+const builtLabel = built.toISOString().replace("T", " ").slice(0, 16) + " UTC";
+
+const swatches = [
+  ["--bg-0", "base"],
+  ["--bg-2", "sleeve"],
+  ["--accent", "machine"],
+  ["--gold", "jewelry"],
+  ["--cream", "human"],
+  ["--ink-1", "ink"],
+  ["--error", "failure"],
+] as const;
+---
+
+<Base locale="en" title="JXN-000 — status" description="System status for JXN-000.">
+  <Header locale="en" />
+
+  <main id="main" class="container track">
+    <div class="window">
+      <div class="window-bar">
+        <span>jxn-000 — system status</span>
+        <span class="win-controls"><span>—</span><span>□</span><span>×</span></span>
+      </div>
+      <div class="status-body">
+        <dl class="readout">
+          <dt>cat. no</dt><dd>JXN-000</dd>
+          <dt>state</dt><dd><span class="live">● operational</span></dd>
+          <dt>build</dt><dd>{__COMMIT__}</dd>
+          <dt>mastered</dt><dd>{builtLabel}</dd>
+          <dt>uptime</dt><dd id="uptime">measuring…</dd>
+          <dt>host</dt><dd id="host">—</dd>
+          <dt>engine</dt><dd>astro 5 · react islands · hand-rolled everything else</dd>
+          <dt>cargo</dt><dd>0 cookies · 0 trackers · 0 skill bars</dd>
+          <dt>tempo</dt><dd>90 bpm (structural)</dd>
+        </dl>
+
+        <div class="tokens">
+          <span class="label">registers</span>
+          <span class="swatches">
+            {swatches.map(([t, name]) => <i style={`background: var(${t})`} title={`${name} · ${t}`} />)}
+          </span>
+        </div>
+
+        <div class="grove">
+          <pre id="status-bonsai" aria-label="an ASCII bonsai, grown from this site's age"></pre>
+          <p class="label grove-note">
+            planted {config.launchDate}. it grows with the site. check back.
+          </p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <Footer locale="en" />
+
+  <script>
+    import { ageBonsai, bonsaiToHtml, growBonsai } from "@/lib/bonsai";
+    import { config } from "@/config";
+
+    // live uptime since last master
+    const built = new Date(__BUILD_TIME__).getTime();
+    const up = document.getElementById("uptime");
+    function tick(): void {
+      const ms = Date.now() - built;
+      const d = Math.floor(ms / 86400000);
+      const h = Math.floor((ms % 86400000) / 3600000);
+      const m = Math.floor((ms % 3600000) / 60000);
+      const s = Math.floor((ms % 60000) / 1000);
+      if (up) {
+        up.textContent = `${d}d ${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")} (since last master)`;
+      }
+    }
+    tick();
+    setInterval(tick, 1000);
+
+    const host = document.getElementById("host");
+    if (host) host.textContent = location.host || "local playback";
+
+    // the tree — this week's tree, grown live (instant if reduced motion)
+    const el = document.getElementById("status-bonsai");
+    if (el) {
+      const { seed, steps } = ageBonsai(config.launchDate);
+      const gen = growBonsai(seed, steps);
+      if (matchMedia("(prefers-reduced-motion: reduce)").matches) {
+        let last = gen.next();
+        while (!last.done) last = gen.next();
+        el.innerHTML = bonsaiToHtml(last.value);
+      } else {
+        const timer = setInterval(() => {
+          const next = gen.next();
+          el.innerHTML = bonsaiToHtml(next.value);
+          if (next.done) clearInterval(timer);
+        }, 110);
+      }
+    }
+  </script>
+
+  <style>
+    .status-body {
+      padding: clamp(1.2rem, 3vw, 2rem);
+      display: grid;
+      gap: 1.8rem;
+    }
+
+    .live {
+      color: var(--status-live);
+    }
+
+    .tokens {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .grove pre {
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      line-height: 1.25;
+      margin: 0;
+      overflow-x: auto;
+      min-height: 18em;
+    }
+
+    .grove-note {
+      margin-top: 0.6rem;
+    }
+  </style>
+</Base>

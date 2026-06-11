@@ -153,4 +153,92 @@ bottom-right.
 
 ---
 
-## BATCH 3 — pending
+## BATCH 3 — received 2026-06-11 (final batch)
+
+### B3-01 / B3-02 · cbonsai — ASCII bonsai growing in a terminal (two shots)
+A bonsai tree drawn in colored ASCII (`&` foliage, `/~\_|` trunk), animated
+growth, potted in an ASCII planter. One shot has a dashed-border tooltip
+annotation ("This is How-To Geek's Tree!").
+**Extract — Norbert's explicit ask: "the tree would move and grow and such,
+we'd put it somewhere":**
+- **The terminal gets a `bonsai` command** — full animated growth, cbonsai
+  style, written from scratch.
+- **The /status page gets THE tree:** same generator, but seeded
+  deterministically by the site's age — it grows a little more every week the
+  site is alive. A living thing on the server page. Returning visitors watch
+  it grow over months. Never explained.
+- The dashed-border tooltip style becomes our annotation language (catalog
+  number hover cards).
+
+### B3-03 · "SYSTEM HACKED" red glitch vector
+Red-on-dark: cascading trail of repeated ERROR dialog windows (OK / NO
+buttons), halftone texture, registration marks (+ grids, ×).
+**Extract:**
+- **Red is a system state, not a color.** It appears ONLY when something is
+  wrong: the 404/error pages, terminal error output. Nowhere else, ever.
+  That scarcity is what makes it land.
+- The 404 page: OS-chrome ERROR dialog with a cascading window trail,
+  OK / NO buttons (deadpan: both go home), glitch slices.
+- Registration-mark micro-glyphs (+ × ┄) join the texture vocabulary.
+
+### B3-04 · Cream halftone figure at a computer (type-noise portrait)
+Human silhouette at a keyboard rendered entirely in halftone dots and
+horizontal streaks of broken mono type, warm cream on near-black.
+**Extract:**
+- **Direct confirmation of the hero/portrait treatment** — human form emerging
+  from character noise. This is the target render for (a) the hero's ASCII
+  field and (b) the portrait's dither-resolve treatment.
+- The warm cream (#EFE3C2 family) on black: imagery wears CREAM, not the
+  accent. Print warmth against machine cold.
+- Horizontal type-streak glitch (text bleeding off silhouette edges) — usable
+  sparingly in the hero canvas.
+
+### B3-05 · Red "ERROR" hex-dump typography
+Giant ERROR letterforms built from small mono hex bytes, red on dark,
+repeated dimly in the background.
+**Extract:**
+- **Type-as-data-mask:** enormous numerals/words filled with live mono data.
+  The 404's "404" gets built from scrolling hex bytes.
+- Background echo: the same word repeated at near-invisible contrast behind
+  the main composition.
+
+---
+
+# FINAL SYNTHESIS — locked direction (creative freedom granted 2026-06-11)
+
+Norbert's summary of his own direction: *"some ascii, some colorful, hiphop,
+crt, terminal, rap, graffiti, black and white."* Full creative + implementation
+freedom granted. Easter eggs: *"the weirder or more complex or fascinating,
+the better."*
+
+## Palette (LOCKED)
+| Token | Value | Role |
+|---|---|---|
+| `--bg-*` | #0a0a0c → #16161b | near-black base, never pure black |
+| `--accent` | **#41EAD4** phosphor teal-cyan | THE cold accent. Machine-on. Terminal ink, links, live states |
+| `--gold` | **#D8C08A** champagne | jewelry only: catalog numbers, link hover, one or two hairlines |
+| `--cream` | **#EFE3C2** print cream | imagery & halftone layer — human warmth (the portrait, ASCII figure work) |
+| `--error` | **#FF2E2E** signal red | system-state only: 404, errors. Never decorative |
+| ink scale | #f4f4f6 → #55555d | text hierarchy |
+
+Four registers: **cyan = machine on · gold = jewelry · cream = human/print ·
+red = failure.** The spec's "ONE cold accent" rule holds — gold/cream/red are
+utilities with strict jobs, not accents.
+
+## Surfaces
+1. **Sleeve** — paper-grain card, 1px border, mounted (never full-bleed),
+   corner metadata stamp. Projects, portrait.
+2. **Window** — OS chrome: title bar, controls. Terminal, /status, 404 dialog.
+3. **Label** — NATO-stock `key: value` mono blocks. Metadata everywhere.
+
+## Where each reference ended up
+- ASCII fluid hero (B3-04 + neofetch culture) · CRT scanline/vignette overlay
+  (CRT corner) · bonsai on /status + in terminal (B3-01/02) · red 404 with
+  hex-filled numerals (B3-03/05) · sleeve-mounted duotone portrait, chain
+  glint stays warm (B2-04 + B2-05) · OS-chrome overlays (B2-02) · neofetch
+  `fetch` command + token swatch strip (B2-03) · deadpan register + ASCII cat
+  easter egg (B1-05 ×2) · halftone grain + cyan×gold tension (B1-01/03) ·
+  one human mark, pending Norbert's actual scribble (B1-02).
+- Banned and staying banned: literal boomboxes, mics, graffiti letterforms,
+  artist imagery, advisory badges, purple.
+

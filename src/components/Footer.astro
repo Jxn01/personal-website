@@ -1,0 +1,60 @@
+---
+import type { Locale } from "@/i18n";
+import { getDict } from "@/i18n";
+import { config } from "@/config";
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const dict = getDict(locale);
+
+// the actual design tokens, credited like session musicians
+const swatches = [
+  ["--bg-0", "base"],
+  ["--accent", "machine"],
+  ["--gold", "jewelry"],
+  ["--cream", "human"],
+  ["--ink-1", "ink"],
+] as const;
+---
+
+<footer class="liner">
+  <div class="container">
+    {dict.footer.lines.map((line) => <div>{line}</div>)}
+    {
+      config.currentAlbum && (
+        <div class="spinning">
+          {dict.now.spinningLabel} {config.currentAlbum}
+        </div>
+      )
+    }
+    <div class="liner-meta">
+      <span class="swatches" title="the actual design tokens. yes, really.">
+        {swatches.map(([token, name]) => (
+          <i style={`background: var(${token})`} title={`${name} · ${token}`}></i>
+        ))}
+      </span>
+      <span>JXN-000</span>
+      <span class="stdin" title="stdin is open">stdin: ~</span>
+      <a href="/humans.txt">humans.txt</a>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .spinning {
+    color: var(--gold);
+  }
+  .stdin {
+    color: var(--accent-dim);
+    cursor: default;
+  }
+  .liner a {
+    color: var(--ink-3);
+  }
+  .liner a:hover {
+    color: var(--gold);
+  }
+</style>

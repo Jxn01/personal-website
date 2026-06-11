@@ -4,14 +4,10 @@
    Every color on the site resolves through a variable defined here. Swapping
    the accent is a one-line change, never a refactor.
 
-   ┌─ PENDING DECISION ────────────────────────────────────────────────────┐
-   │ The ONE cold accent (--accent) and the champagne-gold jewelry tone     │
-   │ (--gold) are PLACEHOLDERS until Norbert's screenshots land. The values │
-   │ below are a neutral steel-phosphor holding pattern so the skeleton      │
-   │ reads as intentional — they are NOT the final palette. Do not treat     │
-   │ this as "the model chose." See docs/jxn-000-site-asset.md, Part 4 #6.   │
-   │ NO PURPLE.                                                              │
-   └────────────────────────────────────────────────────────────────────────┘
+   PALETTE LOCKED 2026-06-11 under granted creative freedom — see
+   docs/art-direction.md "FINAL SYNTHESIS". Four registers:
+   cyan = machine on · gold = jewelry · cream = human/print · red = failure.
+   NO PURPLE. Ever.
    ========================================================================== */
 
 :root {
@@ -32,15 +28,24 @@
   --line-1: rgba(255, 255, 255, 0.04); /* grid / scanline */
   --grain: rgba(255, 255, 255, 0.015); /* paper-grain on sleeves */
 
-  /* — ACCENT (PLACEHOLDER — pending screenshots) ——————————————————————————— */
-  --accent: #5be0c8; /* steel-phosphor holding value — TBD */
+  /* — ACCENT · phosphor teal-cyan — the ONE cold accent ———————————————————— */
+  --accent: #41ead4;
   --accent-dim: color-mix(in oklab, var(--accent) 55%, var(--bg-0));
+  --accent-faint: color-mix(in oklab, var(--accent) 22%, var(--bg-0));
   --accent-glow: color-mix(in oklab, var(--accent) 40%, transparent);
-  --accent-ink: #07120f; /* text ON accent fills */
+  --accent-ink: #03201b; /* text ON accent fills */
 
   /* — GOLD (the jewelry — extremely sparing: catalog #s, link hover, hairline) */
-  --gold: #d8c08a; /* champagne — PLACEHOLDER, lock with accent */
+  --gold: #d8c08a;
   --gold-dim: color-mix(in oklab, var(--gold) 60%, var(--bg-0));
+
+  /* — CREAM (the human/print register — imagery, halftone, ASCII figure work) */
+  --cream: #efe3c2;
+  --cream-dim: color-mix(in oklab, var(--cream) 55%, var(--bg-0));
+
+  /* — ERROR (system-state red: 404 + error output ONLY, never decorative) —— */
+  --error: #ff2e2e;
+  --error-dim: color-mix(in oklab, var(--error) 45%, var(--bg-0));
 
   /* — semantic roles ———————————————————————————————————————————————————————— */
   --status-live: var(--accent);

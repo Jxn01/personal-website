@@ -1,0 +1,130 @@
+---
+import "@fontsource-variable/space-grotesk";
+import "@fontsource-variable/jetbrains-mono";
+import "@/styles/global.css";
+import type { Locale } from "@/i18n";
+import { getDict } from "@/i18n";
+
+interface Props {
+  locale: Locale;
+  /** Override <title> (404, status). */
+  title?: string;
+  description?: string;
+  /** Error pages: red favicon, no needle drop. */
+  variant?: "default" | "error";
+}
+
+const { locale, title, description, variant = "default" } = Astro.props;
+const dict = getDict(locale);
+const pageTitle = title ?? dict.meta.title;
+const pageDescription = description ?? dict.meta.description;
+const favicon = variant === "error" ? "/favicon-error.svg" : "/favicon.svg";
+
+// liner notes for those who view source — the cleanest room in the house
+const sourceNote = `
+     ██╗██╗  ██╗███╗   ██╗      ██████╗  ██████╗  ██████╗
+     ██║╚██╗██╔╝████╗  ██║     ██╔═████╗██╔═████╗██╔═████╗
+     ██║ ╚███╔╝ ██╔██╗ ██║     ██║██╔██║██║██╔██║██║██╔██║
+██   ██║ ██╔██╗ ██║╚██╗██║     ████╔╝██║████╔╝██║████╔╝██║
+╚█████╔╝██╔╝ ██╗██║ ╚████║     ╚██████╔╝╚██████╔╝╚██████╔╝
+ ╚════╝ ╚═╝  ╚═╝╚═╝  ╚═══╝      ╚═════╝  ╚═════╝  ╚═════╝
+
+produced & engineered by Norbert Oláh
+recorded in Budapest · mixed with machines · mastered by hand
+no cookies · no trackers · no skill bars
+
+you're reading the source. correct instinct. stdin is open: press ~
+`;
+---
+
+<!doctype html>
+<html lang={dict.meta.htmlLang} data-side={dict.meta.side}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{pageTitle}</title>
+    <meta name="description" content={pageDescription} />
+    <meta name="author" content="Norbert Oláh" />
+    <meta name="generator" content={Astro.generator} />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={pageDescription} />
+    <meta property="og:type" content="website" />
+    <link rel="icon" type="image/svg+xml" href={favicon} />
+    <link rel="author" href="/humans.txt" />
+    {
+      // hreflang pairs — EN canonical, structure-identical HU
+      variant === "default" && (
+        <>
+          <link rel="alternate" hreflang="en" href="/en" />
+          <link rel="alternate" hreflang="hu" href="/hu" />
+        </>
+      )
+    }
+
+    {/* needle-drop gate: runs before paint, no flash for returning visitors */}
+    <script is:inline>
+      (function () {
+        var reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+        if (reduced || sessionStorage.getItem("jxn.dropped")) {
+          document.documentElement.classList.add("dropped");
+        }
+      })();
+    </script>
+
+    {/* the record flip: only SIDE A ↔ SIDE B navigations get the theatrics */}
+    <script is:inline>
+      window.addEventListener("pagereveal", function (e) {
+        if (!e.viewTransition) return;
+        var from = window.navigation?.activation?.from?.url;
+        if (!from) return;
+        var was = new URL(from).pathname.split("/")[1];
+        var is_ = location.pathname.split("/")[1];
+        var locales = ["en", "hu"];
+        if (locales.includes(was) && locales.includes(is_) && was !== is_) {
+          document.documentElement.dataset.vt = "flip";
+        } else {
+          e.viewTransition.skipTransition();
+        }
+      });
+    </script>
+  </head>
+  <body>
+    <Fragment set:html={`<!--${sourceNote}-->`} />
+
+    {
+      variant === "default" && (
+        <div id="needle" aria-hidden="true">
+          <div class="nd-inner">
+            <span class="nd-type nd-cursor" />
+            <div class="nd-wave" />
+          </div>
+        </div>
+      )
+    }
+
+    <a class="bracket skip-link" href="#main">{dict.ui.skipToContent}</a>
+
+    <slot />
+
+    <div id="toast" role="status" aria-live="polite"></div>
+    <pre id="cat-walk" aria-hidden="true"></pre>
+
+    {variant === "default" && <script>import "@/scripts/needle";</script>}
+    <script>import "@/scripts/eggs";</script>
+
+    <style>
+      .skip-link {
+        position: absolute;
+        top: -3rem;
+        left: var(--gutter);
+        z-index: 100;
+        background: var(--bg-2);
+        padding: 0.5rem 0.8rem;
+        transition: top var(--beat-quarter) var(--ease-out);
+      }
+      .skip-link:focus-visible {
+        top: 0.5rem;
+      }
+    </style>
+  </body>
+</html>

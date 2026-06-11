@@ -1,0 +1,895 @@
+/* ============================================================================
+   JXN-000 · GLOBAL STYLES
+   dark techwear, hip-hop in the lining. four registers:
+   cyan = machine on · gold = jewelry · cream = human/print · red = failure
+   ========================================================================== */
+
+@import "./tokens.css";
+
+/* — reset ——————————————————————————————————————————————————————————————— */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 5rem;
+}
+
+body {
+  margin: 0;
+  background: var(--bg-0);
+  color: var(--ink-1);
+  font-family: var(--font-display);
+  font-size: var(--step-0);
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+img,
+svg,
+canvas {
+  display: block;
+  max-width: 100%;
+}
+
+/* — the room: faint dot grid behind everything ————————————————————————— */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background-image: radial-gradient(var(--line-1) 1px, transparent 1px);
+  background-size: 28px 28px;
+  pointer-events: none;
+}
+
+/* — selection: the machine notices you ————————————————————————————————— */
+::selection {
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+
+.gold::selection,
+.catalog::selection {
+  background: var(--gold);
+  color: #1a1408;
+}
+
+:focus-visible {
+  outline: 1px dashed var(--accent);
+  outline-offset: 3px;
+}
+
+/* — type ———————————————————————————————————————————————————————————————— */
+h1,
+h2,
+h3 {
+  color: var(--ink-0);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  margin: 0;
+}
+
+p {
+  max-width: var(--measure);
+  margin: 0 0 1.1em;
+}
+
+strong {
+  color: var(--ink-0);
+  font-weight: 600;
+}
+
+code {
+  font-family: var(--font-mono);
+  font-size: 0.88em;
+  color: var(--cream);
+  background: var(--bg-3);
+  border: 1px solid var(--line-1);
+  padding: 0.08em 0.35em;
+  border-radius: var(--radius);
+}
+
+a {
+  color: var(--accent);
+  text-decoration: underline;
+  text-decoration-color: color-mix(in oklab, var(--accent) 35%, transparent);
+  text-underline-offset: 0.22em;
+  transition: color var(--beat-quarter) var(--ease-out),
+    text-decoration-color var(--beat-quarter) var(--ease-out);
+}
+
+/* the jewelry: links glint gold on hover */
+a:hover {
+  color: var(--gold);
+  text-decoration-color: var(--gold-dim);
+}
+
+.mono {
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+}
+
+.label {
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--ink-2);
+}
+
+/* NATO-stock-label stamp */
+.stamp {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--ink-2);
+  border: 1px solid var(--line-0);
+  padding: 0.15rem 0.5rem;
+  border-radius: var(--radius);
+  background: var(--bg-1);
+}
+
+/* vinyl catalog number — mono + gold, crate-digger energy */
+.catalog {
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  letter-spacing: 0.12em;
+  color: var(--gold);
+  position: relative;
+  cursor: help;
+}
+
+/* dashed annotation card on catalog hover (the cbonsai tooltip style) */
+.catalog[data-note]::after {
+  content: attr(data-note);
+  position: absolute;
+  bottom: calc(100% + 0.6rem);
+  left: 0;
+  white-space: pre;
+  font-size: 0.72rem;
+  letter-spacing: 0.02em;
+  text-transform: none;
+  color: var(--ink-1);
+  background: var(--bg-1);
+  border: 1px dashed var(--ink-3);
+  padding: 0.45rem 0.7rem;
+  opacity: 0;
+  translate: 0 4px;
+  pointer-events: none;
+  transition: opacity var(--beat-quarter) var(--ease-out),
+    translate var(--beat-quarter) var(--ease-out);
+  z-index: 10;
+}
+
+.catalog[data-note]:hover::after,
+.catalog[data-note]:focus-visible::after {
+  opacity: 1;
+  translate: 0 0;
+}
+
+/* — layout —————————————————————————————————————————————————————————————— */
+.container {
+  max-width: var(--maxw);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+
+.track {
+  padding-block: clamp(4rem, 9vh, 7.5rem);
+  position: relative;
+}
+
+/* tracklist heading: `04 — FEATURED PROJECTS · 02:31` */
+.track-head {
+  display: flex;
+  align-items: baseline;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: clamp(1.8rem, 4vh, 3rem);
+}
+
+.track-head .no {
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  color: var(--accent);
+  letter-spacing: 0.1em;
+}
+
+.track-head h2 {
+  font-size: var(--step-2);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.track-head .dur {
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  color: var(--ink-3);
+  margin-left: auto;
+  font-variant-numeric: tabular-nums;
+}
+
+/* — waveform divider (1px line with slight amplitude — never an audio player) */
+.waveform {
+  display: block;
+  width: 100%;
+  height: 24px;
+  color: var(--line-0);
+}
+
+/* — sleeve cards: record sleeve, not glassmorphism ————————————————————— */
+.sleeve {
+  position: relative;
+  background: var(--bg-2);
+  border: 1px solid var(--line-0);
+  border-radius: var(--radius);
+  padding: clamp(1.2rem, 3vw, 2rem);
+  transition: border-color var(--beat-quarter) var(--ease-out),
+    translate var(--beat-quarter) var(--ease-out);
+}
+
+/* paper grain — SVG turbulence, barely there */
+.sleeve::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E");
+  pointer-events: none;
+  mix-blend-mode: overlay;
+}
+
+.sleeve:hover {
+  border-color: color-mix(in oklab, var(--accent) 35%, var(--line-0));
+  translate: 0 -2px;
+}
+
+/* — field notes: incident-report log ———————————————————————————————————— */
+.fieldnote {
+  border: 1px solid var(--line-0);
+  border-radius: var(--radius);
+  background: var(--bg-1);
+  margin-bottom: 0.6rem;
+}
+
+.fieldnote summary {
+  display: flex;
+  align-items: baseline;
+  gap: 0.9rem;
+  padding: 0.85rem 1.1rem;
+  cursor: pointer;
+  list-style: none;
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+}
+
+.fieldnote summary::-webkit-details-marker {
+  display: none;
+}
+
+.fieldnote summary .fn-id {
+  color: var(--accent);
+  letter-spacing: 0.08em;
+  flex-shrink: 0;
+}
+
+.fieldnote summary .fn-title {
+  color: var(--ink-0);
+}
+
+.fieldnote summary .fn-mark {
+  margin-left: auto;
+  color: var(--ink-3);
+  transition: rotate var(--beat-quarter) var(--ease-out);
+}
+
+.fieldnote[open] summary .fn-mark {
+  rotate: 45deg;
+}
+
+.fieldnote .fn-body {
+  padding: 0 1.1rem 1.1rem calc(1.1rem);
+  border-top: 1px dashed var(--line-0);
+}
+
+.fieldnote .fn-body p {
+  padding-top: 0.9rem;
+  margin: 0;
+  max-width: var(--measure);
+}
+
+/* — hero ————————————————————————————————————————————————————————————————— */
+.hero {
+  position: relative;
+  min-height: 92svh;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+}
+
+.hero-canvas {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+
+.hero-inner {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+}
+
+.hero-name {
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+  margin-bottom: 0.8rem;
+}
+
+.hero h1 {
+  font-size: var(--step-hero);
+  letter-spacing: -0.04em;
+  line-height: 0.95;
+  /* CRT phosphor fringing — accent/gold, never rgb-split red */
+  text-shadow:
+    1px 0 0 color-mix(in oklab, var(--accent) 30%, transparent),
+    -1px 0 0 color-mix(in oklab, var(--gold) 22%, transparent);
+}
+
+.hero-body {
+  margin-top: 1.6rem;
+  max-width: 56ch;
+  color: var(--ink-1);
+}
+
+.hero-ctas {
+  display: flex;
+  gap: 1.4rem;
+  flex-wrap: wrap;
+  margin-top: 1.8rem;
+}
+
+/* bracket buttons: `[ view work ↓ ]` — the brackets are real */
+.bracket {
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  text-decoration: none;
+  color: var(--accent);
+}
+
+.bracket::before {
+  content: "[ ";
+  color: var(--ink-3);
+}
+
+.bracket::after {
+  content: " ]";
+  color: var(--ink-3);
+}
+
+.bracket:hover {
+  color: var(--gold);
+}
+
+.hero-micro {
+  margin-top: 3.2rem;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: var(--ink-3);
+}
+
+.hero-micro::before {
+  content: "// ";
+}
+
+/* CRT overlay: scanlines + vignette + the faintest flicker */
+.crt::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent 0,
+    transparent 2px,
+    rgba(0, 0, 0, 0.13) 3px,
+    transparent 4px
+  );
+}
+
+.crt::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: radial-gradient(
+    ellipse 120% 90% at 50% 45%,
+    transparent 55%,
+    rgba(0, 0, 0, 0.42) 100%
+  );
+  animation: crt-flicker calc(var(--beat) * 6) steps(1) infinite;
+}
+
+@keyframes crt-flicker {
+  0%, 93%, 100% { opacity: 1; }
+  94% { opacity: 0.92; }
+  95% { opacity: 1; }
+  97% { opacity: 0.96; }
+  98% { opacity: 1; }
+}
+
+/* — portrait placeholder (until masters arrive) ————————————————————————— */
+.portrait {
+  position: relative;
+  aspect-ratio: 4 / 5;
+  border: 1px dashed var(--ink-3);
+  border-radius: var(--radius);
+  background:
+    radial-gradient(circle at 50% 38%, color-mix(in oklab, var(--cream) 14%, transparent) 0%, transparent 42%),
+    radial-gradient(var(--line-0) 1.5px, transparent 1.5px);
+  background-size: 100% 100%, 7px 7px;
+  display: grid;
+  place-items: end start;
+  padding: 1rem;
+}
+
+/* — stack tiers ————————————————————————————————————————————————————————— */
+.tier {
+  border-top: 1px solid var(--line-0);
+  padding-block: 1.6rem;
+}
+
+.tier h3 {
+  font-size: var(--step-1);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.tier .tier-intro {
+  color: var(--ink-2);
+  font-style: italic;
+  margin: 0.4rem 0 1rem;
+}
+
+.tier ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 0;
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  color: var(--ink-1);
+  max-width: none;
+}
+
+.tier li:not(:last-child)::after {
+  content: "·";
+  color: var(--gold);
+  margin-inline: 0.65rem;
+}
+
+/* — off the clock grid —————————————————————————————————————————————————— */
+.offclock-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 0.8rem;
+}
+
+.offclock-grid .sleeve h3 {
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--accent);
+  margin-bottom: 0.5rem;
+}
+
+.offclock-grid .sleeve p {
+  margin: 0;
+  font-size: var(--step--1);
+  line-height: 1.6;
+}
+
+/* — window chrome (terminal, status, 404) ——————————————————————————————— */
+.window {
+  background: var(--bg-1);
+  border: 1px solid var(--line-0);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.window-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.45rem 0.8rem;
+  border-bottom: 1px solid var(--line-0);
+  background: var(--bg-2);
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  color: var(--ink-2);
+  user-select: none;
+}
+
+.window-bar .win-controls {
+  margin-left: auto;
+  display: flex;
+  gap: 0.45rem;
+  color: var(--ink-3);
+}
+
+/* — key:value readout (NATO label / neofetch energy) ———————————————————— */
+.readout {
+  font-family: var(--font-mono);
+  font-size: var(--step--1);
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 0.25rem 1.2rem;
+  margin: 0;
+}
+
+.readout dt {
+  color: var(--accent);
+}
+
+.readout dd {
+  margin: 0;
+  color: var(--ink-1);
+}
+
+/* — token swatch strip (terminal palette flex) ——————————————————————————— */
+.swatches {
+  display: flex;
+  gap: 0;
+}
+
+.swatches i {
+  width: 1.05rem;
+  height: 0.7rem;
+  display: inline-block;
+}
+
+/* — footer liner notes —————————————————————————————————————————————————— */
+.liner {
+  border-top: 1px solid var(--line-0);
+  padding-block: 2.2rem 2.6rem;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: var(--ink-2);
+  line-height: 2;
+}
+
+.liner .liner-meta {
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+  flex-wrap: wrap;
+  margin-top: 1.2rem;
+  color: var(--ink-3);
+}
+
+/* — header —————————————————————————————————————————————————————————————— */
+.site-head {
+  position: sticky;
+  top: 0;
+  z-index: var(--z-header);
+  backdrop-filter: blur(10px);
+  background: color-mix(in oklab, var(--bg-0) 78%, transparent);
+  border-bottom: 1px solid var(--line-1);
+}
+
+.site-head .bar {
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+  min-height: 3.2rem;
+}
+
+.side-toggle {
+  margin-left: auto;
+  display: flex;
+  gap: 0;
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  letter-spacing: 0.1em;
+  border: 1px solid var(--line-0);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.side-toggle a,
+.side-toggle span {
+  padding: 0.32rem 0.7rem;
+  text-decoration: none;
+}
+
+.side-toggle span {
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+
+.side-toggle a {
+  color: var(--ink-2);
+}
+
+.side-toggle a:hover {
+  color: var(--gold);
+}
+
+/* — playhead (scroll progress as track position) ————————————————————————— */
+.playhead {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: var(--z-playhead);
+  pointer-events: none;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--ink-2);
+  background: linear-gradient(to top, color-mix(in oklab, var(--bg-0) 88%, transparent), transparent);
+  padding: 0.9rem var(--gutter) 0.55rem;
+}
+
+.playhead .ph-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.4rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.playhead .ph-track {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.playhead .ph-rail {
+  position: relative;
+  height: 2px;
+  background: var(--line-0);
+}
+
+.playhead .ph-bar {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 0%;
+  background: var(--accent);
+}
+
+.playhead .ph-tick {
+  position: absolute;
+  top: -3px;
+  width: 1px;
+  height: 8px;
+  background: var(--ink-3);
+  pointer-events: auto;
+  cursor: pointer;
+}
+
+.playhead .ph-tick:hover {
+  background: var(--gold);
+}
+
+/* — needle drop (boot overlay) ——————————————————————————————————————————— */
+#needle {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-needle);
+  background: var(--bg-0);
+  display: grid;
+  place-items: center;
+  transition: opacity 250ms var(--ease-out);
+}
+
+html.dropped #needle {
+  display: none;
+}
+
+#needle .nd-inner {
+  font-family: var(--font-mono);
+  font-size: clamp(0.85rem, 2vw, 1.05rem);
+  letter-spacing: 0.18em;
+  color: var(--accent);
+  text-align: center;
+}
+
+#needle .nd-wave {
+  margin-top: 1.1rem;
+  height: 1px;
+  width: min(260px, 60vw);
+  background: var(--accent);
+  transform-origin: left;
+  scale: 0 1;
+}
+
+#needle.play .nd-wave {
+  animation: nd-draw var(--beat-half) var(--ease-out) forwards;
+  animation-delay: 400ms;
+}
+
+@keyframes nd-draw {
+  to { scale: 1 1; }
+}
+
+#needle .nd-cursor::after {
+  content: "▌";
+  animation: nd-blink 0.8s steps(1) infinite;
+}
+
+@keyframes nd-blink {
+  50% { opacity: 0; }
+}
+
+/* — reveal-on-scroll (666ms grid, staggered by --i) —————————————————————— */
+.reveal {
+  opacity: 0;
+  translate: 0 18px;
+  transition:
+    opacity var(--beat) var(--ease-out),
+    translate var(--beat) var(--ease-out);
+  transition-delay: calc(var(--i, 0) * var(--beat-quarter));
+}
+
+.reveal.in {
+  opacity: 1;
+  translate: 0 0;
+}
+
+/* — the record flip (cross-document view transitions) ———————————————————— */
+@view-transition {
+  navigation: auto;
+}
+
+/* default cross-doc navigations: no theatrics */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+}
+
+/* SIDE A ↔ SIDE B: one full beat — 333ms out, 333ms in */
+html[data-vt="flip"]::view-transition-old(root) {
+  animation: vt-flip-out var(--beat-half) var(--ease-in-out) both;
+}
+
+html[data-vt="flip"]::view-transition-new(root) {
+  animation: vt-flip-in var(--beat-half) var(--ease-in-out) var(--beat-half) both;
+}
+
+@keyframes vt-flip-out {
+  to {
+    transform: perspective(1400px) rotateY(-88deg);
+    opacity: 0.4;
+  }
+}
+
+@keyframes vt-flip-in {
+  from {
+    transform: perspective(1400px) rotateY(88deg);
+    opacity: 0.4;
+  }
+}
+
+/* — konami degauss ———————————————————————————————————————————————————————— */
+html.degauss body {
+  animation: degauss var(--beat) var(--ease-in-out) 1;
+}
+
+@keyframes degauss {
+  0% { transform: skewX(0) scale(1); filter: none; }
+  20% { transform: skewX(1.5deg) scale(1.004); filter: saturate(2.2) hue-rotate(8deg); }
+  45% { transform: skewX(-1deg) scale(0.998); filter: saturate(0.6); }
+  70% { transform: skewX(0.4deg) scale(1.002); filter: saturate(1.4); }
+  100% { transform: none; filter: none; }
+}
+
+/* the cat walks by (konami payload) */
+#cat-walk {
+  position: fixed;
+  bottom: 2.4rem;
+  left: 0;
+  z-index: 99;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  line-height: 1.1;
+  color: var(--cream);
+  white-space: pre;
+  pointer-events: none;
+  translate: -120% 0;
+}
+
+#cat-walk.go {
+  animation: cat-walk calc(var(--beat) * 9) linear forwards;
+}
+
+@keyframes cat-walk {
+  from { translate: -20vw 0; }
+  to { translate: 110vw 0; }
+}
+
+/* "boombap" typed: the grain pulses 4 beats at exactly 90 BPM */
+html.pocket body::before {
+  animation: pocket var(--beat) steps(2) 4;
+}
+
+@keyframes pocket {
+  0% { opacity: 1; }
+  50% { opacity: 0.35; }
+  100% { opacity: 1; }
+}
+
+/* toast (egg feedback — mono, deadpan) */
+#toast {
+  position: fixed;
+  bottom: 3.4rem;
+  left: 50%;
+  translate: -50% 16px;
+  z-index: 99;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: var(--ink-0);
+  background: var(--bg-2);
+  border: 1px dashed var(--ink-3);
+  padding: 0.5rem 0.9rem;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--beat-quarter) var(--ease-out), translate var(--beat-quarter) var(--ease-out);
+}
+
+#toast.show {
+  opacity: 1;
+  translate: -50% 0;
+}
+
+/* — reduced motion: still gorgeous, never moving ————————————————————————— */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  .reveal {
+    opacity: 1;
+    translate: none;
+    transition: none;
+  }
+
+  .crt::before {
+    animation: none;
+  }
+
+  ::view-transition-old(root),
+  ::view-transition-new(root),
+  html[data-vt="flip"]::view-transition-old(root),
+  html[data-vt="flip"]::view-transition-new(root) {
+    animation: none !important;
+  }
+
+  #needle {
+    display: none !important;
+  }
+}
+
+/* — print: the record, flat ———————————————————————————————————————————————— */
+@media print {
+  .playhead,
+  .site-head,
+  #needle,
+  .hero-canvas {
+    display: none !important;
+  }
+}

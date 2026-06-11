@@ -2,10 +2,19 @@
 import { defineConfig } from "astro/config";
 import react from "@astrojs/react";
 import sitemap from "@astrojs/sitemap";
+import { execSync } from "node:child_process";
 
 // JXN-000 — the site itself is a portfolio piece: static-first, clean under
 // view-source, fast. Domain-agnostic per spec (lives at jxn.ddns.net for now,
 // but nothing here assumes it).
+
+let commit = "0000000";
+try {
+  commit = execSync("git rev-parse --short HEAD").toString().trim();
+} catch {
+  /* shallow or detached environments still get a build */
+}
+
 export default defineConfig({
   site: "https://jxn.ddns.net",
   // SIDE A = en (canonical), SIDE B = hu. Faithful localization, structure-identical.
@@ -14,12 +23,18 @@ export default defineConfig({
     locales: ["en", "hu"],
     routing: {
       prefixDefaultLocale: true, // /en and /hu both explicit — no ambiguous root
+      redirectToDefaultLocale: false, // root redirect is ours: locale-sniffing index
     },
   },
   integrations: [react(), sitemap()],
-  // View Transitions power the SIDE A/B "record flip". Real cross-document flip.
   trailingSlash: "never",
   build: {
     inlineStylesheets: "auto",
+  },
+  vite: {
+    define: {
+      __BUILD_TIME__: JSON.stringify(new Date().toISOString()),
+      __COMMIT__: JSON.stringify(commit),
+    },
   },
 });
