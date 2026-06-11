@@ -53,3 +53,12 @@ function needleDrop(): void {
 
 needleDrop();
 document.addEventListener("astro:page-load", needleDrop);
+
+// soft navigations ship a fresh #needle in the new body — remove it BEFORE
+// first paint or it flashes a full black frame mid-flip
+document.addEventListener("astro:after-swap", () => {
+  if (played || sessionStorage.getItem("jxn.dropped")) {
+    document.documentElement.classList.add("dropped");
+    document.getElementById("needle")?.remove();
+  }
+});

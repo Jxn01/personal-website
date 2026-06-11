@@ -24,8 +24,21 @@ interface Props {
 export default function Spray({ onClose }: Props): React.ReactElement {
   const [colors, setColors] = useState<string[]>([]);
   const [color, setColor] = useState("");
+  // touch: you can't scroll through an armed wall — give the can a safety
+  const [moving, setMoving] = useState(false);
+  const coarse =
+    typeof matchMedia !== "undefined" && matchMedia("(pointer: coarse)").matches;
   const colorRef = useRef(color);
   colorRef.current = color;
+
+  const toggleMove = (): void => {
+    const c = wallCanvas();
+    if (!c) return;
+    setMoving((m) => {
+      c.classList.toggle("armed", m); // m === true → back to spraying
+      return !m;
+    });
+  };
 
   useEffect(() => {
     const palette = [
@@ -137,6 +150,7 @@ export default function Spray({ onClose }: Props): React.ReactElement {
     return () => {
       // cap the can: disarm the wall, keep the paint, save the piece
       canvas.classList.remove("armed");
+      setMoving(false);
       saveWall();
       cancelAnimationFrame(raf);
       canvas.removeEventListener("pointerdown", onDown);
@@ -157,6 +171,15 @@ export default function Spray({ onClose }: Props): React.ReactElement {
           onClick={() => setColor(c)}
         />
       ))}
+      {coarse && (
+        <button
+          className="deck-btn"
+          onClick={toggleMove}
+          title="put a finger down without painting"
+        >
+          {moving ? "spray" : "scroll"}
+        </button>
+      )}
       <button className="deck-btn" onClick={wipeWall} title="buff the wall">
         wipe
       </button>

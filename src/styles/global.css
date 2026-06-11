@@ -1391,3 +1391,158 @@ main > .track:nth-of-type(3n + 1):not(.hero) .track-head h2 {
   25% { translate: 1px 0; }
   75% { translate: -1px 0; }
 }
+
+/* ============================================================================
+   V3.1 — phone patch + hero legibility
+   ========================================================================== */
+
+/* never let the boot overlay flash during a flip */
+html.flip-out #needle,
+html.flip-in #needle {
+  display: none !important;
+}
+
+/* — hero text protection: a soft pool of dark under the copy ————————————— */
+.hero-inner {
+  position: relative;
+}
+
+.hero-inner::before {
+  content: "";
+  position: absolute;
+  inset: -3rem -2rem;
+  z-index: -1;
+  background: radial-gradient(
+    closest-side at 28% 50%,
+    color-mix(in oklab, var(--bg-0) 92%, transparent) 30%,
+    color-mix(in oklab, var(--bg-0) 72%, transparent) 58%,
+    transparent 100%
+  );
+  pointer-events: none;
+}
+
+.hero-body {
+  color: var(--ink-0);
+  text-shadow: 0 1px 14px var(--bg-0);
+}
+
+.hero-micro {
+  color: var(--ink-2);
+}
+
+@media (max-width: 720px) {
+  /* the pool covers the whole column on small screens */
+  .hero-inner::before {
+    inset: -2rem -100vw -2rem -2rem;
+    background: linear-gradient(
+      90deg,
+      color-mix(in oklab, var(--bg-0) 90%, transparent) 0%,
+      color-mix(in oklab, var(--bg-0) 78%, transparent) 70%,
+      color-mix(in oklab, var(--bg-0) 55%, transparent) 100%
+    );
+  }
+
+  /* calmer signal behind small text */
+  .crt::after {
+    opacity: calc(0.5 * var(--fx-scan));
+  }
+}
+
+/* — about: keep the sleeve comfortably inside the column ————————————————— */
+@media (max-width: 840px) {
+  .about-grid .portrait {
+    max-width: min(300px, 82vw);
+    justify-self: start;
+  }
+}
+
+/* — touch ergonomics for the toys ————————————————————————————————————————— */
+@media (pointer: coarse) {
+  /* iOS zooms any focused input under 16px. don't give it the excuse. */
+  .term-input-row input {
+    font-size: 16px;
+  }
+
+  .term {
+    height: min(460px, 72svh);
+  }
+
+  /* tappable suggestions — no keyboard archaeology required */
+  .term-chips {
+    display: flex;
+  }
+
+  /* fatter faders */
+  .mix-ch input[type="range"]::-webkit-slider-thumb {
+    width: 1.05rem;
+    height: 1.7rem;
+  }
+
+  .mix-ch input[type="range"]::-moz-range-thumb {
+    width: 1.05rem;
+    height: 1.7rem;
+  }
+
+  .mix-ch {
+    padding-block: 0.25rem;
+  }
+
+  /* pads: bigger cells, momentum scroll, voice labels stay put */
+  .pads-cell {
+    min-width: 1.7rem;
+  }
+
+  .pads-grid {
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .pads-voice {
+    position: sticky;
+    left: 0;
+    z-index: 2;
+    background: var(--bg-2);
+  }
+
+  .deck-btn {
+    padding: 0.5rem 0.6rem;
+  }
+}
+
+/* terminal quick chips (hidden unless coarse pointer) */
+.term-chips {
+  display: none;
+  gap: 0.4rem;
+  padding: 0.45rem 0.8rem 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.term-chips button {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--accent);
+  background: var(--bg-2);
+  border: 1px solid var(--line-0);
+  border-radius: 999px;
+  padding: 0.3rem 0.75rem;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+/* the status tree on a phone: smaller glyphs, same tree (height is in em) */
+@media (max-width: 520px) {
+  .st-grove pre {
+    font-size: 0.55rem;
+  }
+
+  .status-modal {
+    width: 96vw;
+  }
+}
+
+/* (must follow the base .term-chips rule above to win the cascade) */
+@media (pointer: coarse) {
+  .term-chips {
+    display: flex;
+  }
+}

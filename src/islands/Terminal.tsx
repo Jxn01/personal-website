@@ -329,6 +329,13 @@ export default function Terminal({ onClose, onOverlay }: Props): React.ReactElem
             />
           ))}
         </div>
+        <div className="term-chips" aria-label="quick commands">
+          {["help", "fetch", "ls", "bonsai", "pads", "cat 02", "side a", "side b"].map((c) => (
+            <button key={c} onClick={() => run(c)} disabled={busy}>
+              {c}
+            </button>
+          ))}
+        </div>
         <div className="term-input-row">
           <span className="t-prompt">jxn@jxn-000:~$</span>
           <input
