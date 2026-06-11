@@ -1,55 +1,65 @@
 /* ============================================================================
    JXN-000 · DESIGN TOKENS
    ----------------------------------------------------------------------------
-   Every color on the site resolves through a variable defined here. Swapping
-   the accent is a one-line change, never a refactor.
+   Every color on the site resolves through a variable defined here.
 
-   PALETTE LOCKED 2026-06-11 under granted creative freedom — see
-   docs/art-direction.md "FINAL SYNTHESIS". Four registers:
-   cyan = machine on · gold = jewelry · cream = human/print · red = failure.
-   NO PURPLE. Ever.
+   PALETTE v2 (locked with Norbert, 2026-06-11): warm, happier, slightly muted.
+   Two records, two inks:
+     SIDE A (EN) — vice pink, toned down from full 80s neon
+     SIDE B (HU) — warm peach
+   Gold stays the jewelry. Cream stays the human/print register. Red stays
+   failure-only. NO PURPLE. Ever.
+
+   The accent is written as H/S/L parts so THE MIXER (the on-site fader deck)
+   can remix it live. Everything else derives via color-mix.
    ========================================================================== */
 
 :root {
-  /* — near-black base (spec: #0a0a0c–#101014, never pure black) ———————————— */
-  /* lifted one notch from the first cut — less void, still techwear-dark */
-  --bg-0: #101116; /* deepest — page base */
-  --bg-1: #15161c; /* raised surfaces */
-  --bg-2: #1a1b22; /* cards / sleeves */
-  --bg-3: #22232c; /* hover / inset */
+  /* — warm charcoal base (near-black with a heated undertone, never pure) —— */
+  --bg-0: #171311; /* deepest — page base */
+  --bg-1: #1c1815; /* raised surfaces */
+  --bg-2: #221d19; /* cards / sleeves */
+  --bg-3: #2b2520; /* hover / inset */
 
-  /* — ink scale (text on dark) ———————————————————————————————————————————— */
-  --ink-0: #f6f6f8; /* primary text */
-  --ink-1: #d2d2d9; /* body */
-  --ink-2: #9698a2; /* muted / metadata */
-  --ink-3: #62646e; /* faint labels, disabled */
+  /* — ink scale (warm paper-white on dark) ————————————————————————————————— */
+  --ink-0: #f8f5f1; /* primary text */
+  --ink-1: #ddd6cd; /* body */
+  --ink-2: #a39c92; /* muted / metadata */
+  --ink-3: #6e675e; /* faint labels, disabled */
 
   /* — hairlines & texture ————————————————————————————————————————————————— */
-  --line-0: rgba(255, 255, 255, 0.1); /* 1px borders */
-  --line-1: rgba(255, 255, 255, 0.05); /* grid / scanline */
-  --grain: rgba(255, 255, 255, 0.018); /* paper-grain on sleeves */
+  --line-0: rgba(255, 245, 230, 0.12); /* 1px borders */
+  --line-1: rgba(255, 245, 230, 0.05); /* grid / scanline */
+  --grain: rgba(255, 245, 230, 0.02); /* paper-grain on sleeves */
 
-  /* — ACCENT · phosphor teal-cyan — the ONE cold accent ———————————————————— */
-  --accent: #41ead4;
+  /* — ACCENT · SIDE A default: vice pink (muted) ——————————————————————————— */
+  /* hsl parts so the mixer can grab the hue fader */
+  --accent-h: 338;
+  --accent-s: 72%;
+  --accent-l: 70%;
+  --accent: hsl(var(--accent-h) var(--accent-s) var(--accent-l));
   --accent-dim: color-mix(in oklab, var(--accent) 55%, var(--bg-0));
-  --accent-faint: color-mix(in oklab, var(--accent) 22%, var(--bg-0));
-  --accent-glow: color-mix(in oklab, var(--accent) 40%, transparent);
-  --accent-ink: #03201b; /* text ON accent fills */
+  --accent-faint: color-mix(in oklab, var(--accent) 20%, var(--bg-0));
+  --accent-glow: color-mix(in oklab, var(--accent) 38%, transparent);
+  --accent-ink: #2a0d18; /* text ON accent fills */
 
-  /* — GOLD (the jewelry — extremely sparing: catalog #s, link hover, hairline) */
+  /* — GOLD (the jewelry — catalog #s, link hover, hairline details) ———————— */
   --gold: #d8c08a;
   --gold-dim: color-mix(in oklab, var(--gold) 60%, var(--bg-0));
 
-  /* — CREAM (the human/print register — imagery, halftone, ASCII figure work) */
+  /* — CREAM (the human/print register — imagery, halftone, ASCII figures) —— */
   --cream: #efe3c2;
   --cream-dim: color-mix(in oklab, var(--cream) 55%, var(--bg-0));
 
+  /* — MINT (small pop: live dots, success, the third voice — sparing) —————— */
+  --mint: #a8d8b4;
+
   /* — ERROR (system-state red: 404 + error output ONLY, never decorative) —— */
-  --error: #ff2e2e;
+  --error: #ff3b34;
   --error-dim: color-mix(in oklab, var(--error) 45%, var(--bg-0));
 
   /* — semantic roles ———————————————————————————————————————————————————————— */
-  --status-live: var(--accent);
+  --status-live: var(--mint);
   --status-pending: var(--ink-2);
 
   /* — type ————————————————————————————————————————————————————————————————— */
@@ -77,10 +87,24 @@
   --maxw: 1320px;
   --radius: 2px; /* technical, not soft — record sleeve corners */
 
-  --z-needle: 90; /* boot sequence */
-  --z-terminal: 80;
+  --z-needle: 90;
+  --z-overlay: 80; /* terminal, pads, mixer, status modal */
+  --z-spray: 70;
+  --z-deck: 65;
   --z-header: 60;
   --z-playhead: 50;
+
+  /* mixer-controlled surface dials */
+  --fx-grain: 1; /* dot-grid opacity multiplier */
+  --fx-scan: 1; /* scanline opacity multiplier */
+}
+
+/* SIDE B — the Hungarian record plays in warm peach */
+html[data-side="B"] {
+  --accent-h: 27;
+  --accent-s: 80%;
+  --accent-l: 67%;
+  --accent-ink: #2a1505;
 }
 
 /* honor reduced-motion globally — needle drop, flip, shader all gate on this */

@@ -66,7 +66,7 @@ That's the honest version. The longer version: full-stack developer building and
 
 ## 02 — ABOUT
 
-I'm Norbert — a full-stack developer in Budapest. By day I work on **EverLink**, an access control and parking platform: hundreds of installed systems across Hungary, the largest serving a few thousand cardholders. I'm one of three developers, and my territory is the client and everything the client touches — the React/TypeScript frontend, the Laravel backend behind it, the realtime layer, and a healthy share of the server firefighting when production decides to have opinions.
+I'm Norbert — a full-stack developer in Budapest. By day I work on **EverLink**, an access control and parking platform: hundreds of installed systems across Hungary, the largest serving a few thousand cardholders. My territory is the client and everything the client touches — the React/TypeScript frontend, the Laravel backend behind it, the realtime layer, and a healthy share of the server firefighting when production decides to have opinions.
 
 I graduated from ELTE's Computer Science BSc in 2024, which means I've been paid to write code for two years and writing it for considerably longer. University put an unreasonable number of languages through my hands — C to Haskell to Agda — and the takeaway wasn't any single language. It was that everything is a system, and systems can be understood.
 
@@ -79,7 +79,7 @@ When I'm not at a keyboard I'm— okay, I'm usually still at a keyboard, but a d
 ### Developer — EverLink
 **2024 → present · Budapest**
 
-EverLink builds access control and parking systems — physical infrastructure with software brains. Card readers, barriers, kiosks, and the platform that orchestrates all of it. Small company, ~10 people, three developers. No safety net, no "someone else's problem." When it's yours, it's *yours*.
+EverLink builds access control and parking systems — physical infrastructure with software brains. Card readers, barriers, kiosks, and the platform that orchestrates all of it. A small company with no safety net and no “someone else's problem.” When it's yours, it's *yours*.
 
 My domain is the client side and everything adjacent to it:
 
@@ -96,7 +96,7 @@ On-site at a new installation, mid-deployment, the system decided to comprehensi
 A large Laravel codebase had outgrown its structure, and moving ~970 PHP files by hand is how you create a thousand subtle bugs. Instead I drove the refactor programmatically through the IDE's scripting API, so every move updated every reference atomically. Big, scary, boring — exactly the kind of change you automate or don't attempt.
 
 **FN-03 · The static analysis grind.**
-Took the codebase from "PHPStan level 2, two hundred-plus errors" up through level 5, clean. Not glamorous. Every level is a hundred small arguments with your past self. The codebase argues back less now.
+Took the codebase from "PHPStan level 2, two hundred-plus errors" up through level 8, clean. Not glamorous. Every level is a hundred small arguments with your past self. The codebase argues back less now.
 
 **FN-04 · Infrastructure firefighting.**
 Apache MPM misconfigurations, a database that refused to start after reboot because a runtime directory didn't survive it, custom systemd units that needed to actually behave like services. The kind of problems that don't show up in portfolios because there's nothing to screenshot — just a system that stays up now.
@@ -117,7 +117,7 @@ Full disclosure, because I'd rather say it than have you guess: this one was bui
 
 A lightweight, modular, SEO-first CMS written in plain PHP. No framework, no build step, no dependency tree that needs its own monitoring.
 
-The origin story is better than the elevator pitch: a colleague (not a developer) needed a website he could maintain *without me*, and he had exactly one piece of hosting available — an existing WordPress server he didn't want to replace with a paid VPS. So the whole thing is engineered to live inside a WordPress host's constraints: plain PHP, drop-in deployable, no special server requirements. Then I ripped out everything specific to him, generalized it, and section-cms was born.
+The origin story is better than the elevator pitch: a colleague (not a developer) needed a website he could maintain *without me*, and he had exactly one piece of hosting available — an existing WordPress server he didn't want to replace with a paid VPS. So the whole thing is engineered to live inside a WordPress host's constraints: plain PHP, drop-in deployable, no special server requirements.
 
 It's also my quiet proof that I know what the frameworks are doing under the hood. Laravel pays my bills; this shows I understand *why*.
 
@@ -203,7 +203,6 @@ C · C++ · Haskell · Erlang · Agda (type theory) · R · SageMath (cryptograp
 
 **Currently:**
 - Building this site and getting it properly hosted
-- Hardening EverLink's frontend tooling and grinding static analysis levels
 - Plotting the calculator
 - Dying repeatedly in `[CURRENT GAME]`
 
@@ -254,7 +253,7 @@ Ez az őszinte verzió. A hosszabb: full-stack fejlesztő vagyok, olyan éles re
 
 ## 02 — RÓLAM
 
-Norbert vagyok, full-stack fejlesztő Budapesten. Napközben az **EverLinken** dolgozom, ami egy beléptető- és parkolórendszer-platform: több száz telepített rendszer országszerte, a legnagyobb néhány ezer kártyás felhasználót szolgál ki. Hárman vagyunk fejlesztők, az én terepem a kliens és minden, ami a klienshez ér — a React/TypeScript frontend, a mögötte ülő Laravel backend, a realtime réteg, és egy egészséges adag szerveroldali tűzoltás, amikor a production úgy dönt, hogy véleménye van.
+Norbert vagyok, full-stack fejlesztő Budapesten. Napközben az **EverLinken** dolgozom, ami egy beléptető- és parkolórendszer-platform: több száz telepített rendszer országszerte, a legnagyobb néhány ezer kártyás felhasználót szolgál ki. Az én terepem a kliens és minden, ami a klienshez ér — a React/TypeScript frontend, a mögötte ülő Laravel backend, a realtime réteg, és egy egészséges adag szerveroldali tűzoltás, amikor a production úgy dönt, hogy véleménye van.
 
 2024-ben végeztem az ELTE programtervező informatikus BSc szakán — vagyis két éve fizetnek azért, hogy kódot írjak, és jóval régebb óta írom. Az egyetem észszerűtlen mennyiségű nyelvet adott a kezembe — C-től Haskellen át Agdáig —, és a tanulság nem egy konkrét nyelv volt. Hanem az, hogy minden rendszer, és a rendszerek megérthetők.
 
@@ -267,7 +266,7 @@ Amikor nem a billentyűzetnél ülök, akkor— jó, általában akkor is a bill
 ### Fejlesztő — EverLink
 **2024 → jelenleg · Budapest**
 
-Az EverLink beléptető- és parkolórendszereket épít — fizikai infrastruktúrát, szoftveraggyal. Kártyaolvasók, sorompók, kioszkok, és a platform, ami az egészet vezényli. Kis cég, ~10 ember, három fejlesztő. Nincs védőháló, nincs „majd valaki más". Ami a tiéd, az a *tiéd*.
+Az EverLink beléptető- és parkolórendszereket épít — fizikai infrastruktúrát, szoftveraggyal. Kártyaolvasók, sorompók, kioszkok, és a platform, ami az egészet vezényli. Kis cég, védőháló nélkül — nincs „majd valaki más". Ami a tiéd, az a *tiéd*.
 
 Az én területem a kliensoldal és minden, ami hozzá kapcsolódik:
 
@@ -284,7 +283,7 @@ Helyszíni telepítés egy új ügyfélnél, a deploy kellős közepén a rendsz
 Egy nagy Laravel kódbázis kinőtte a struktúráját, és ~970 PHP fájlt kézzel mozgatni a legbiztosabb módja annak, hogy ezer apró bugot gyárts. Ehelyett programozottan vezényeltem le a refaktort az IDE szkriptelő API-ján keresztül, így minden mozgatás atomikusan frissített minden hivatkozást. Nagy, ijesztő, unalmas — pont az a fajta változtatás, amit vagy automatizálsz, vagy bele se kezdesz.
 
 **FN-03 · A statikus analízis darálás.**
-A kódbázist a „PHPStan level 2, kétszáz-plusz hiba" állapotból felvittem level 5-re, tisztán. Nem látványos. Minden szint száz apró vita a múltbeli önmagaddal. A kódbázis azóta kevesebbet vitatkozik vissza.
+A kódbázist a „PHPStan level 2, kétszáz-plusz hiba" állapotból felvittem level 8-ra, tisztán. Nem látványos. Minden szint száz apró vita a múltbeli önmagaddal. A kódbázis azóta kevesebbet vitatkozik vissza.
 
 **FN-04 · Infrastruktúra-tűzoltás.**
 Apache MPM félrekonfiguráció, adatbázis, ami reboot után nem volt hajlandó elindulni, mert egy futásidejű könyvtár nem élte túl az újraindítást, custom systemd unitok, amiknek tényleg service-ként kellett viselkedniük. Az a fajta probléma, ami azért nem szerepel portfóliókban, mert nincs miről screenshotot lőni — csak egy rendszer, ami azóta talpon marad.
@@ -305,7 +304,7 @@ Teljes őszinteség, mert inkább kimondom, mint hogy találgass: ez a projekt s
 
 Könnyűsúlyú, moduláris, SEO-first CMS, sima PHP-ban megírva. Se framework, se build lépés, se olyan függőségi fa, amit külön monitorozni kéne.
 
-Az origin story jobb, mint az elevator pitch: egy (nem fejlesztő) kollégának kellett egy weboldal, amit *nélkülem* is karban tud tartani, és pontosan egy darab hostingja volt — egy meglévő WordPress-szerver, amit nem akart fizetős VPS-re cserélni. Szóval az egész úgy lett megtervezve, hogy egy WordPress-host korlátai között éljen: sima PHP, bedobható deploy, nulla speciális szerverigény. Aztán kiszedtem belőle mindent, ami rá volt szabva, általánosítottam, és megszületett a section-cms.
+Az origin story jobb, mint az elevator pitch: egy (nem fejlesztő) kollégának kellett egy weboldal, amit *nélkülem* is karban tud tartani, és pontosan egy darab hostingja volt — egy meglévő WordPress-szerver, amit nem akart fizetős VPS-re cserélni. Szóval az egész úgy lett megtervezve, hogy egy WordPress-host korlátai között éljen: sima PHP, bedobható deploy, nulla speciális szerverigény.
 
 Egyben a csendes bizonyítékom is arra, hogy tudom, mit csinálnak a frameworkök a motorháztető alatt. A Laravel fizeti a számláimat; ez mutatja meg, hogy értem is, *miért*.
 
@@ -387,7 +386,6 @@ C · C++ · Haskell · Erlang · Agda (típuselmélet) · R · SageMath (kriptog
 
 **Éppen:**
 - Építem ezt az oldalt, és rendes hosztot szerzek neki
-- Az EverLink frontend toolingját keményítem és statikus analízis szinteket darálok
 - Tervezem a számológépet
 - Ismételten meghalok ebben: `[AKTUÁLIS JÁTÉK]`
 

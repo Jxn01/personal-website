@@ -1,7 +1,7 @@
 /**
- * The eggs. Weird, complex, fascinating — and never explained on the page.
- * Registry lives in docs/design.md. If you're reading this in the bundle:
- * yes, this is all of them. Probably.
+ * The eggs that stay eggs. The big toys moved into the deck (bottom right,
+ * clearly labeled — discoverability beats mystique). What remains here are
+ * the bonuses for people who type at websites.
  */
 
 const html = document.documentElement;
@@ -9,12 +9,12 @@ const html = document.documentElement;
 /* — console liner notes ————————————————————————————————————————————————— */
 const mono = "font-family:monospace";
 console.log(
-  "%cJXN-000%c — side %s\n%cproduced & engineered by Norbert Oláh\nno cookies · no trackers · no skill bars\n\n%cstdin is open. press ~",
+  "%cJXN-000%c — side %s\n%cproduced & engineered by Norbert Oláh\nno cookies · no trackers · no skill bars\n\n%cthe toys are in the deck, bottom right. the terminal also answers to ~",
   `${mono};color:#d8c08a;font-size:14px;letter-spacing:.2em`,
-  `${mono};color:#8a8a93`,
+  `${mono};color:#a39c92`,
   html.dataset.side ?? "A",
-  `${mono};color:#8a8a93`,
-  `${mono};color:#41ead4`,
+  `${mono};color:#a39c92`,
+  `${mono};color:#e887ab`,
 );
 
 /* — toast: deadpan feedback channel ————————————————————————————————————— */
@@ -29,10 +29,32 @@ export function toast(msg: string): void {
 }
 
 /* — needle up: blur the tab, lift the needle ———————————————————————————— */
-const realTitle = document.title;
-document.addEventListener("visibilitychange", () => {
-  document.title = document.hidden ? "⏸ needle up — JXN-000" : realTitle;
+let realTitle = document.title;
+document.addEventListener("astro:page-load", () => {
+  realTitle = document.title;
 });
+document.addEventListener("visibilitychange", () => {
+  if (document.hidden) {
+    realTitle = document.title;
+    document.title = "⏸ needle up — JXN-000";
+  } else {
+    document.title = realTitle;
+  }
+});
+
+/* — header status link opens the modal instead of navigating ———————————— */
+function bindStatusLinks(): void {
+  document.querySelectorAll<HTMLAnchorElement>("a.js-status").forEach((a) => {
+    if (a.dataset.bound) return;
+    a.dataset.bound = "1";
+    a.addEventListener("click", (e) => {
+      e.preventDefault();
+      dispatchEvent(new CustomEvent("jxn:overlay", { detail: "status" }));
+    });
+  });
+}
+bindStatusLinks();
+document.addEventListener("astro:page-load", bindStatusLinks);
 
 /* — typed sequences: konami + "boombap" ————————————————————————————————— */
 const KONAMI = [

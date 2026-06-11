@@ -1,11 +1,14 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { navigate } from "astro:transitions/client";
 import { growBonsai, bonsaiToHtml } from "../lib/bonsai";
 import { withBase } from "../lib/url";
+import type { OverlayId } from "./Deck";
 import "./terminal.css";
 
 /**
- * The terminal. Press ~ anywhere. It reads the actual page for `ls`/`cat`,
- * reports the actual build for `uptime`, and grows actual trees.
+ * The terminal. Lives in the deck (and answers to ~ / `). It reads the actual
+ * page for `ls`/`cat`, reports the actual build for `uptime`, grows actual
+ * trees, and can reach every other toy in the deck.
  * Machines speak English; the terminal is EN on both sides of the record.
  */
 
@@ -14,9 +17,8 @@ type LineKind = "in" | "out" | "err" | "raw";
 interface Line {
   kind: LineKind;
   html: string;
+  id: number;
 }
-
-let lineId = 0;
 
 const esc = (s: string): string =>
   s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
@@ -56,56 +58,46 @@ function fmtUptime(): string {
   return `${d}d ${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
 }
 
-export default function Terminal(): React.ReactElement | null {
-  const [open, setOpen] = useState(false);
-  const [lines, setLines] = useState<Line[]>([]);
+// session memory: closing the window doesn't wipe the scrollback
+let scrollback: Line[] = [];
+let history: string[] = [];
+let lineSeq = 0;
+
+interface Props {
+  onClose: () => void;
+  onOverlay: (id: OverlayId) => void;
+}
+
+export default function Terminal({ onClose, onOverlay }: Props): React.ReactElement {
+  const [lines, setLines] = useState<Line[]>(scrollback);
   const [value, setValue] = useState("");
   const [busy, setBusy] = useState(false);
-  const historyRef = useRef<string[]>([]);
-  const histIdx = useRef(-1);
+  const histIdx = useRef(history.length);
   const inputRef = useRef<HTMLInputElement>(null);
   const bodyRef = useRef<HTMLDivElement>(null);
   const bonsaiTimer = useRef<number>(0);
 
   const print = useCallback((kind: LineKind, html: string): void => {
-    setLines((prev) => [...prev, { kind, html }]);
+    setLines((prev) => {
+      scrollback = [...prev, { kind, html, id: lineSeq++ }];
+      return scrollback;
+    });
   }, []);
 
   const out = useCallback((text: string) => print("out", esc(text)), [print]);
   const err = useCallback((text: string) => print("err", esc(text)), [print]);
   const raw = useCallback((html: string) => print("raw", html), [print]);
 
-  // open/close
   useEffect(() => {
-    const onKey = (e: KeyboardEvent): void => {
-      const t = e.target as HTMLElement;
-      const typing =
-        t.tagName === "INPUT" || t.tagName === "TEXTAREA" || t.isContentEditable;
-      if (e.key === "~" && !typing) {
-        e.preventDefault();
-        setOpen((o) => !o);
-      } else if (e.key === "Escape") {
-        setOpen(false);
-      }
-    };
-    addEventListener("keydown", onKey);
-    return () => removeEventListener("keydown", onKey);
-  }, []);
-
-  useEffect(() => {
-    if (open) {
-      inputRef.current?.focus();
-      if (lines.length === 0) {
-        raw(
-          `<span class="t-dim">jxn-000 terminal — type <span class="t-accent">help</span>. or don't. exploration is respected.</span>`,
-        );
-      }
-    } else {
-      window.clearInterval(bonsaiTimer.current);
-      setBusy(false);
+    inputRef.current?.focus();
+    if (scrollback.length === 0) {
+      raw(
+        `<span class="t-dim">jxn-000 terminal — type <span class="t-accent">help</span>. or don't. exploration is respected.</span>`,
+      );
     }
+    return () => window.clearInterval(bonsaiTimer.current);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open]);
+  }, []);
 
   useEffect(() => {
     bodyRef.current?.scrollTo({ top: bodyRef.current.scrollHeight });
@@ -121,8 +113,11 @@ export default function Terminal(): React.ReactElement | null {
           `<span class="t-accent">cat</span> <span class="t-dim">&lt;n&gt;</span>   read a track (number or name)`,
           `<span class="t-accent">uptime</span>    since last master`,
           `<span class="t-accent">bonsai</span>    grow one`,
-          `<span class="t-accent">side</span> <span class="t-dim">a|b</span>  flip the record`,
+          `<span class="t-accent">pads</span>      open the drum machine`,
+          `<span class="t-accent">tag</span>       open the spray can`,
+          `<span class="t-accent">mix</span>       open the mixer`,
           `<span class="t-accent">status</span>    the engine room`,
+          `<span class="t-accent">side</span> <span class="t-dim">a|b</span>  flip the record`,
           `<span class="t-accent">clear</span>     wipe`,
           `<span class="t-accent">exit</span>      close (esc and :q also work)`,
           `<span class="t-dim">…there are more. this is a crate; dig.</span>`,
@@ -130,7 +125,7 @@ export default function Terminal(): React.ReactElement | null {
       );
     },
     fetch: () => {
-      const sw = ["--bg-2", "--accent", "--gold", "--cream", "--ink-1"]
+      const sw = ["--bg-2", "--accent", "--gold", "--cream", "--mint", "--ink-1"]
         .map((t) => `<span class="t-swatch" style="background:var(${t})"></span>`)
         .join("");
       raw(
@@ -157,7 +152,7 @@ export default function Terminal(): React.ReactElement | null {
       const items = pageSections()
         .map((s) => `<span class="t-accent">${s.no}</span>-${esc(s.title)}.md`)
         .join("\n");
-      raw(items || `<span class="t-dim">empty. you're probably on a subpage — the record is at /en.</span>`);
+      raw(items || `<span class="t-dim">empty. you're probably off the record — the tracks live on /en.</span>`);
     },
     cat: (args) => {
       const q = args.join(" ").trim().toLowerCase();
@@ -192,15 +187,14 @@ export default function Terminal(): React.ReactElement | null {
       }
       out("flipping the record…");
       window.setTimeout(() => {
-        location.href = withBase(side === "a" ? "/en" : "/hu");
+        void navigate(withBase(side === "a" ? "/en" : "/hu"));
       }, 350);
     },
-    status: () => {
-      out("opening the engine room…");
-      window.setTimeout(() => {
-        location.href = withBase("/status");
-      }, 350);
-    },
+    pads: () => onOverlay("pads"),
+    tag: () => onOverlay("spray"),
+    spray: () => onOverlay("spray"),
+    mix: () => onOverlay("mix"),
+    status: () => onOverlay("status"),
     bonsai: () => {
       if (busy) return;
       setBusy(true);
@@ -211,7 +205,12 @@ export default function Terminal(): React.ReactElement | null {
         const grid = next.value;
         setLines((prev) => {
           const copy = [...prev];
-          copy[copy.length - 1] = { kind: "raw", html: bonsaiToHtml(grid) };
+          copy[copy.length - 1] = {
+            ...copy[copy.length - 1]!,
+            kind: "raw",
+            html: bonsaiToHtml(grid),
+          };
+          scrollback = copy;
           return copy;
         });
         if (next.done) {
@@ -219,10 +218,10 @@ export default function Terminal(): React.ReactElement | null {
           setBusy(false);
           print(
             "raw",
-            `<span class="t-dim">done growing. the one on /status grows with the site — check back next month.</span>`,
+            `<span class="t-dim">done growing. the one in <span class="t-accent">status</span> grows with the site — check back next month.</span>`,
           );
         }
-      }, 90);
+      }, 80);
     },
     "hire-me": () => err("permission denied: try sudo."),
     sudo: (args) => {
@@ -247,24 +246,27 @@ export default function Terminal(): React.ReactElement | null {
       window.setTimeout(() => out("BOOM."), 666);
     },
     warframe: () => out("~3,000 hours. I understand sunk cost intimately and continue regardless."),
-    play: () => out("no audio on this site. the beat is structural. (90 bpm — it's in the timings.)"),
+    play: () => out("the beat is structural here — but the pads are real. try: pads"),
     vim: () => out("this is not that kind of terminal. (:q works here though, which is more than some can say.)"),
     nano: () => commands.vim!([]),
     emacs: () => out("no. (respectfully.)"),
     rm: () => err("rm: this record is read-only. as records should be."),
     man: () => out("the only manual here is docs/jxn-000-site-asset.md, and you can't have it."),
-    clear: () => setLines([]),
-    exit: () => setOpen(false),
-    ":q": () => setOpen(false),
-    ":wq": () => setOpen(false),
+    clear: () => {
+      scrollback = [];
+      setLines([]);
+    },
+    exit: () => onClose(),
+    ":q": () => onClose(),
+    ":wq": () => onClose(),
   };
 
   const run = (input: string): void => {
     const trimmed = input.trim();
     print("in", esc(trimmed));
     if (!trimmed) return;
-    historyRef.current.push(trimmed);
-    histIdx.current = historyRef.current.length;
+    history.push(trimmed);
+    histIdx.current = history.length;
     const [cmd = "", ...args] = trimmed.split(/\s+/);
     const fn = commands[cmd.toLowerCase()];
     if (fn) {
@@ -280,40 +282,36 @@ export default function Terminal(): React.ReactElement | null {
       setValue("");
     } else if (e.key === "ArrowUp") {
       e.preventDefault();
-      const h = historyRef.current;
-      if (h.length === 0) return;
+      if (history.length === 0) return;
       histIdx.current = Math.max(0, histIdx.current - 1);
-      setValue(h[histIdx.current] ?? "");
+      setValue(history[histIdx.current] ?? "");
     } else if (e.key === "ArrowDown") {
       e.preventDefault();
-      const h = historyRef.current;
-      histIdx.current = Math.min(h.length, histIdx.current + 1);
-      setValue(h[histIdx.current] ?? "");
+      histIdx.current = Math.min(history.length, histIdx.current + 1);
+      setValue(history[histIdx.current] ?? "");
     }
   };
 
-  if (!open) return null;
-
   return (
     <div
-      className="term-backdrop"
+      className="ov-backdrop"
       onPointerDown={(e) => {
-        if (e.target === e.currentTarget) setOpen(false);
+        if (e.target === e.currentTarget) onClose();
       }}
     >
-      <div className="window term" role="dialog" aria-label="terminal">
+      <div className="window term ov-window" role="dialog" aria-label="terminal">
         <div className="window-bar">
           <span>jxn@jxn-000: ~</span>
           <span className="win-controls">
-            <button className="win-close" onClick={() => setOpen(false)} aria-label="close">
+            <button className="win-close" onClick={onClose} aria-label="close">
               ×
             </button>
           </span>
         </div>
         <div className="term-body" ref={bodyRef} onClick={() => inputRef.current?.focus()}>
-          {lines.map((l, i) => (
+          {lines.map((l) => (
             <div
-              key={`${i}-${lineId++}`}
+              key={l.id}
               className={`t-${l.kind}`}
               dangerouslySetInnerHTML={{ __html: l.html }}
             />

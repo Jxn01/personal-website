@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import { mixRgb, resolveColor } from "../lib/colors";
 
 /**
  * The hero field: value-noise "smoke" rendered as mono glyphs, disturbed by
@@ -71,13 +72,15 @@ export default function AsciiHero(): React.ReactElement {
     const host: HTMLElement = canvas.closest(".hero") ?? canvas;
 
     const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const styles = getComputedStyle(document.documentElement);
+    // resolve through the engine — color-mix()/var() soup means nothing to canvas
+    const bg = resolveColor("--bg-0");
+    const accent = resolveColor("--accent");
     const colors = {
-      accentDim: styles.getPropertyValue("--accent-dim").trim() || "#2a8d80",
-      accent: styles.getPropertyValue("--accent-dim").trim() || "#2a8d80",
-      accentHot: styles.getPropertyValue("--accent").trim() || "#41ead4",
-      cream: styles.getPropertyValue("--cream").trim() || "#efe3c2",
-      gold: styles.getPropertyValue("--gold").trim() || "#d8c08a",
+      accentDim: mixRgb(accent, bg, 0.62),
+      accent: mixRgb(accent, bg, 0.34),
+      accentHot: accent,
+      cream: resolveColor("--cream"),
+      gold: resolveColor("--gold"),
     };
     const tiers = [colors.accentDim, colors.accent, colors.accentHot, colors.cream];
 

@@ -11,8 +11,9 @@ the cat: canon
 
 /* equipment */
 astro 5 · react islands · typescript (strict, obviously)
-hand-rolled: the noise field, the bonsai, the terminal, the flip
+hand-rolled: the noise field, the bonsai, the terminal, the flip,
+the drum machine, the spray can, the mixer
 served from a box that is somebody's actual responsibility
 
 /* thanks for reading the credits. most people don't. */
-/* stdin is open: press ~ */
+/* the toys are in the deck, bottom right. the terminal also answers to ~ */

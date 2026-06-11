@@ -5,7 +5,6 @@ import Footer from "@/components/Footer.astro";
 import Waveform from "@/components/Waveform.astro";
 import Playhead from "@/components/Playhead.astro";
 import AsciiHero from "@/islands/AsciiHero";
-import Terminal from "@/islands/Terminal";
 import Portrait from "@/components/Portrait.astro";
 import type { Locale } from "@/i18n";
 import { getDict, mmss, readingSeconds, trackNo } from "@/i18n";
@@ -316,9 +315,8 @@ const catalogNote = (cat: string) => `cat. no. ${cat} — from the crate`;
 
   <Footer locale={locale} />
   <Playhead />
-  <Terminal client:idle />
 
-  {/* reveal-on-scroll — the 666ms grid */}
+  {/* reveal-on-scroll — the 666ms grid; re-armed after every soft nav */}
   <script>
     const io = new IntersectionObserver(
       (entries) => {
@@ -331,7 +329,11 @@ const catalogNote = (cat: string) => `cat. no. ${cat} — from the crate`;
       },
       { threshold: 0.12 },
     );
-    document.querySelectorAll(".reveal").forEach((el) => io.observe(el));
+    const arm = (): void => {
+      document.querySelectorAll(".reveal:not(.in)").forEach((el) => io.observe(el));
+    };
+    arm();
+    document.addEventListener("astro:page-load", arm);
   </script>
 </Base>
 

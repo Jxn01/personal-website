@@ -1,0 +1,92 @@
+/* JXN-808 — the pads */
+
+.pads {
+  width: min(720px, 96vw);
+}
+
+.pads-body {
+  padding: 1rem;
+  display: grid;
+  gap: 0.9rem;
+}
+
+.pads-grid {
+  display: grid;
+  gap: 0.35rem;
+  overflow-x: auto;
+  padding-bottom: 0.2rem;
+}
+
+.pads-row {
+  display: grid;
+  grid-template-columns: 3.2rem repeat(var(--steps), minmax(1.2rem, 1fr));
+  gap: 0.28rem;
+  align-items: stretch;
+}
+
+.pads-voice {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  color: var(--gold);
+  background: var(--bg-2);
+  border: 1px solid var(--line-0);
+  border-radius: var(--radius);
+  cursor: pointer;
+}
+
+.pads-voice:hover {
+  border-color: var(--gold-dim);
+}
+
+.pads-cell {
+  aspect-ratio: 1;
+  min-width: 1.2rem;
+  border: 1px solid var(--line-0);
+  border-radius: var(--radius);
+  background: var(--bg-1);
+  cursor: pointer;
+  padding: 0;
+  transition: background var(--beat-quarter) var(--ease-out);
+}
+
+/* downbeats carry a faint tick so the bar reads at a glance */
+.pads-cell[data-beat] {
+  border-color: color-mix(in oklab, var(--ink-2) 40%, var(--line-0));
+}
+
+.pads-cell[data-on] {
+  background: var(--accent);
+  border-color: var(--accent);
+  box-shadow: 0 0 10px var(--accent-glow);
+}
+
+.pads-cell[data-now] {
+  border-color: var(--cream);
+}
+
+.pads-cell[data-on][data-now] {
+  background: var(--cream);
+  border-color: var(--cream);
+}
+
+.pads-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.pads-play {
+  color: var(--accent);
+  border-color: var(--accent-dim);
+  min-width: 5rem;
+}
+
+.pads-note {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  color: var(--ink-3);
+  margin-left: auto;
+  max-width: 24rem;
+}

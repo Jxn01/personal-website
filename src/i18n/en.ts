@@ -29,7 +29,7 @@ export const en: Dict = {
   about: {
     title: "ABOUT",
     paras: [
-      "I'm Norbert — a full-stack developer in Budapest. By day I work on <strong>EverLink</strong>, an access control and parking platform: hundreds of installed systems across Hungary, the largest serving a few thousand cardholders. I'm one of three developers, and my territory is the client and everything the client touches — the React/TypeScript frontend, the Laravel backend behind it, the realtime layer, and a healthy share of the server firefighting when production decides to have opinions.",
+      "I'm Norbert — a full-stack developer in Budapest. By day I work on <strong>EverLink</strong>, an access control and parking platform: hundreds of installed systems across Hungary, the largest serving a few thousand cardholders. My territory is the client and everything the client touches — the React/TypeScript frontend, the Laravel backend behind it, the realtime layer, and a healthy share of the server firefighting when production decides to have opinions.",
       "I graduated from ELTE's Computer Science BSc in 2024, which means I've been paid to write code for two years and writing it for considerably longer. University put an unreasonable number of languages through my hands — C to Haskell to Agda — and the takeaway wasn't any single language. It was that everything is a system, and systems can be understood.",
       "What actually drives me: making things <em>work</em>, and then making them <em>good</em>. I'm the person who fixes the production outage and then spends the evening polishing the frontend animation nobody asked for. Both halves matter. One keeps the lights on, the other is why anyone enjoys flipping the switch.",
       "When I'm not at a keyboard I'm— okay, I'm usually still at a keyboard, but a different one. More below.",
@@ -41,7 +41,7 @@ export const en: Dict = {
     org: "EverLink",
     dates: "2024 → present · Budapest",
     intro:
-      "EverLink builds access control and parking systems — physical infrastructure with software brains. Card readers, barriers, kiosks, and the platform that orchestrates all of it. Small company, ~10 people, three developers. No safety net, no “someone else's problem.” When it's yours, it's <em>yours</em>.",
+      "EverLink builds access control and parking systems — physical infrastructure with software brains. Card readers, barriers, kiosks, and the platform that orchestrates all of it. A small company with no safety net and no “someone else's problem.” When it's yours, it's <em>yours</em>.",
     domainsLead: "My domain is the client side and everything adjacent to it:",
     domains: [
       {
@@ -72,7 +72,7 @@ export const en: Dict = {
       {
         id: "FN-03",
         title: "The static analysis grind.",
-        body: "Took the codebase from “PHPStan level 2, two hundred-plus errors” up through level 5, clean. Not glamorous. Every level is a hundred small arguments with your past self. The codebase argues back less now.",
+        body: "Took the codebase from “PHPStan level 2, two hundred-plus errors” up through level 8, clean. Not glamorous. Every level is a hundred small arguments with your past self. The codebase argues back less now.",
       },
       {
         id: "FN-04",
@@ -102,7 +102,7 @@ export const en: Dict = {
         github: "https://github.com/Jxn01/section-cms",
         paras: [
           "A lightweight, modular, SEO-first CMS written in plain PHP. No framework, no build step, no dependency tree that needs its own monitoring.",
-          "The origin story is better than the elevator pitch: a colleague (not a developer) needed a website he could maintain <em>without me</em>, and he had exactly one piece of hosting available — an existing WordPress server he didn't want to replace with a paid VPS. So the whole thing is engineered to live inside a WordPress host's constraints: plain PHP, drop-in deployable, no special server requirements. Then I ripped out everything specific to him, generalized it, and section-cms was born.",
+          "The origin story is better than the elevator pitch: a colleague (not a developer) needed a website he could maintain <em>without me</em>, and he had exactly one piece of hosting available — an existing WordPress server he didn't want to replace with a paid VPS. So the whole thing is engineered to live inside a WordPress host's constraints: plain PHP, drop-in deployable, no special server requirements.",
           "It's also my quiet proof that I know what the frameworks are doing under the hood. Laravel pays my bills; this shows I understand <em>why</em>.",
         ],
         status: "[STATUS: live demo pending — will be self-hosted]",
@@ -262,7 +262,6 @@ export const en: Dict = {
     lead: "Currently:",
     items: [
       "Building this site and getting it properly hosted",
-      "Hardening EverLink's frontend tooling and grinding static analysis levels",
       "Plotting the calculator",
       "Dying repeatedly in %GAME%",
     ],

@@ -1,22 +1,34 @@
-/* JXN-000 · the terminal. press ~ */
-
-.term-backdrop {
-  position: fixed;
-  inset: 0;
-  z-index: var(--z-terminal);
-  background: rgba(5, 5, 7, 0.55);
-  backdrop-filter: blur(6px);
-  display: grid;
-  place-items: center;
-  padding: 1rem;
-}
+/* JXN-000 · the terminal. in the deck, or press ~ */
 
 .term {
   width: min(780px, 96vw);
   height: min(520px, 82svh);
   display: flex;
   flex-direction: column;
-  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.55);
+}
+
+/* every line lands like it was printed, not pasted */
+.term-body > div {
+  animation: t-line 220ms var(--ease-out) backwards;
+}
+
+@keyframes t-line {
+  from {
+    opacity: 0;
+    translate: 0 5px;
+    filter: brightness(1.9);
+  }
+}
+
+.term-body .t-accent,
+.term-body .t-in::before {
+  text-shadow: 0 0 14px var(--accent-glow);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .term-body > div {
+    animation: none;
+  }
 }
 
 .term-body {
@@ -91,19 +103,6 @@
   color: var(--ink-0);
   font: inherit;
   caret-color: var(--accent);
-}
-
-.term .win-close {
-  cursor: pointer;
-  background: none;
-  border: none;
-  color: var(--ink-3);
-  font: inherit;
-  padding: 0 0.2rem;
-}
-
-.term .win-close:hover {
-  color: var(--error);
 }
 
 /* bonsai registers */

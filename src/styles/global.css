@@ -20,6 +20,7 @@ html {
 
 body {
   margin: 0;
+  overflow-x: clip;
   background: var(--bg-0);
   color: var(--ink-1);
   font-family: var(--font-display);
@@ -45,6 +46,7 @@ body::before {
   background-image: radial-gradient(var(--line-1) 1px, transparent 1px);
   background-size: 28px 28px;
   pointer-events: none;
+  opacity: var(--fx-grain);
 }
 
 /* — selection: the machine notices you ————————————————————————————————— */
@@ -222,7 +224,7 @@ a:hover {
   display: block;
   width: 100%;
   height: 24px;
-  color: var(--line-0);
+  color: color-mix(in oklab, var(--accent) 30%, var(--line-0));
 }
 
 /* — sleeve cards: record sleeve, not glassmorphism ————————————————————— */
@@ -411,6 +413,7 @@ a:hover {
   inset: 0;
   z-index: 1;
   pointer-events: none;
+  opacity: var(--fx-scan);
   background: repeating-linear-gradient(
     to bottom,
     transparent 0,
@@ -763,17 +766,7 @@ html.dropped #needle {
   translate: 0 0;
 }
 
-/* — the record flip (cross-document view transitions) ———————————————————— */
-@view-transition {
-  navigation: auto;
-}
-
-/* default cross-doc navigations: no theatrics */
-::view-transition-old(root),
-::view-transition-new(root) {
-  animation: none;
-}
-
+/* — the record flip (view transitions via ClientRouter) ——————————————————— */
 /* SIDE A ↔ SIDE B: one full beat — 333ms out, 333ms in */
 html[data-vt="flip"]::view-transition-old(root) {
   animation: vt-flip-out var(--beat-half) var(--ease-in-out) both;
@@ -903,5 +896,243 @@ html.pocket body::before {
   #needle,
   .hero-canvas {
     display: none !important;
+  }
+}
+
+/* ============================================================================
+   V2 DRESSING — the grit. golden-era texture below the fold.
+   ========================================================================== */
+
+/* giant ghost track numerals — crate stencils behind every section */
+.track[data-no]::before {
+  content: attr(data-no);
+  position: absolute;
+  right: -0.06em;
+  top: 0.08em;
+  z-index: -1;
+  font-family: var(--font-display);
+  font-size: clamp(8rem, 24vw, 22rem);
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.05em;
+  color: transparent;
+  -webkit-text-stroke: 1.5px color-mix(in oklab, var(--accent) 22%, transparent);
+  rotate: -4deg;
+  pointer-events: none;
+  user-select: none;
+}
+
+.track:nth-of-type(even)[data-no]::before {
+  -webkit-text-stroke-color: color-mix(in oklab, var(--gold) 20%, transparent);
+  rotate: 3deg;
+}
+
+/* spray splat behind track headings — paint, no letterforms */
+.track-head {
+  position: relative;
+}
+
+.track-head::before {
+  content: "";
+  position: absolute;
+  left: -3rem;
+  top: -2.4rem;
+  width: 11rem;
+  height: 7rem;
+  z-index: -1;
+  background: var(--accent);
+  opacity: 0.14;
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 110 70'%3E%3Cellipse cx='52' cy='36' rx='30' ry='17'/%3E%3Cellipse cx='27' cy='27' rx='12' ry='8'/%3E%3Cellipse cx='80' cy='25' rx='9' ry='6'/%3E%3Ccircle cx='91' cy='44' r='4'/%3E%3Ccircle cx='17' cy='47' r='3'/%3E%3Ccircle cx='68' cy='57' r='5'/%3E%3Ccircle cx='99' cy='31' r='2'/%3E%3Ccircle cx='8' cy='34' r='2'/%3E%3Ccircle cx='44' cy='62' r='2.5'/%3E%3C/svg%3E");
+  mask-size: 100% 100%;
+  pointer-events: none;
+}
+
+/* highlighter swipe under section titles — marker, not <hr> */
+.track-head h2 {
+  background-image: linear-gradient(var(--accent-glow), var(--accent-glow));
+  background-repeat: no-repeat;
+  background-size: 100% 0.34em;
+  background-position: 0 82%;
+  padding-inline: 0.08em;
+}
+
+/* stickers: stamps inside sleeves sit slightly crooked, like they were slapped on */
+.sleeve .stamp {
+  rotate: -1.6deg;
+  border-color: var(--gold-dim);
+  color: var(--gold);
+  background: color-mix(in oklab, var(--gold) 8%, var(--bg-1));
+}
+
+/* off-the-clock: three inks rotating through the crate */
+.offclock-grid .sleeve:nth-child(3n + 2) h3 {
+  color: var(--gold);
+}
+
+.offclock-grid .sleeve:nth-child(3n) h3 {
+  color: var(--mint);
+}
+
+/* sleeves tilt like records pulled half out of the crate */
+.sleeve:hover {
+  rotate: -0.35deg;
+}
+
+/* field note ids alternate inks too */
+.fieldnote:nth-child(even) summary .fn-id {
+  color: var(--gold);
+}
+
+/* — THE DECK: visible toy chest, bottom right. no ARG, just buttons. ————— */
+.deck {
+  position: fixed;
+  right: clamp(0.6rem, 2vw, 1.6rem);
+  bottom: 4.4rem;
+  z-index: var(--z-deck);
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.deck-btn {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  color: var(--ink-2);
+  background: color-mix(in oklab, var(--bg-1) 88%, transparent);
+  border: 1px solid var(--line-0);
+  border-radius: var(--radius);
+  padding: 0.42rem 0.6rem;
+  cursor: pointer;
+  backdrop-filter: blur(6px);
+  text-align: center;
+  min-width: 3.4rem;
+  transition:
+    color var(--beat-quarter) var(--ease-out),
+    border-color var(--beat-quarter) var(--ease-out),
+    translate var(--beat-quarter) var(--ease-out);
+}
+
+.deck-btn:hover {
+  color: var(--accent);
+  border-color: var(--accent-dim);
+  translate: -2px 0;
+}
+
+.deck-btn .deck-ico {
+  display: block;
+  font-size: 0.95rem;
+  color: var(--accent);
+  margin-bottom: 0.1rem;
+}
+
+@media (max-width: 720px) {
+  .deck {
+    flex-direction: row;
+    right: 50%;
+    translate: 50% 0;
+    bottom: 3.4rem;
+  }
+
+  .deck-btn {
+    min-width: 3rem;
+    padding: 0.34rem 0.5rem;
+  }
+}
+
+/* — shared overlay chrome (terminal, pads, mixer, status) ————————————————— */
+.ov-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-overlay);
+  background: rgba(10, 7, 5, 0.55);
+  backdrop-filter: blur(6px);
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  animation: ov-in var(--beat-quarter) var(--ease-out);
+}
+
+@keyframes ov-in {
+  from {
+    opacity: 0;
+  }
+}
+
+.ov-window {
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.55);
+  animation: ov-pop var(--beat-half) var(--ease-out);
+}
+
+@keyframes ov-pop {
+  from {
+    opacity: 0;
+    translate: 0 14px;
+    scale: 0.985;
+  }
+}
+
+.win-close {
+  cursor: pointer;
+  background: none;
+  border: none;
+  color: var(--ink-3);
+  font: inherit;
+  padding: 0 0.2rem;
+}
+
+.win-close:hover {
+  color: var(--error);
+}
+
+/* — spray overlay ————————————————————————————————————————————————————————— */
+#spray-canvas {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-spray);
+  cursor: crosshair;
+  touch-action: none;
+}
+
+.spray-tools {
+  position: fixed;
+  z-index: calc(var(--z-spray) + 1);
+  left: 50%;
+  bottom: 1rem;
+  translate: -50% 0;
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  background: color-mix(in oklab, var(--bg-1) 92%, transparent);
+  border: 1px solid var(--line-0);
+  border-radius: var(--radius);
+  padding: 0.5rem 0.7rem;
+  backdrop-filter: blur(8px);
+}
+
+.spray-swatch {
+  width: 1.3rem;
+  height: 1.3rem;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  cursor: pointer;
+  padding: 0;
+}
+
+.spray-swatch[aria-pressed="true"] {
+  border-color: var(--ink-0);
+}
+
+.spray-tools .deck-btn {
+  backdrop-filter: none;
+}
+
+/* reduced motion: overlays snap, no pops */
+@media (prefers-reduced-motion: reduce) {
+  .ov-backdrop,
+  .ov-window {
+    animation: none;
   }
 }

@@ -2,9 +2,11 @@
 import "@fontsource-variable/space-grotesk";
 import "@fontsource-variable/jetbrains-mono";
 import "@/styles/global.css";
+import { ClientRouter } from "astro:transitions";
 import type { Locale } from "@/i18n";
 import { getDict } from "@/i18n";
 import { BASE, withBase } from "@/lib/url";
+import Deck from "@/islands/Deck";
 
 interface Props {
   locale: Locale;
@@ -34,7 +36,8 @@ produced & engineered by Norbert Oláh
 recorded in Budapest · mixed with machines · mastered by hand
 no cookies · no trackers · no skill bars
 
-you're reading the source. correct instinct. stdin is open: press ~
+you're reading the source. correct instinct.
+the toys are in the deck, bottom right. the terminal also answers to ~
 `;
 ---
 
@@ -62,6 +65,8 @@ you're reading the source. correct instinct. stdin is open: press ~
       )
     }
 
+    <ClientRouter />
+
     {/* needle-drop gate: runs before paint, no flash for returning visitors */}
     <script is:inline>
       (function () {
@@ -72,27 +77,32 @@ you're reading the source. correct instinct. stdin is open: press ~
       })();
     </script>
 
-    {/* the record flip: only SIDE A ↔ SIDE B navigations get the theatrics */}
+    {/* the record flip: SIDE A ↔ SIDE B gets the theatrics, in-place, no reload */}
     <script is:inline define:vars={{ base: BASE }}>
-      window.addEventListener("pagereveal", function (e) {
-        if (!e.viewTransition) return;
-        var from = window.navigation && window.navigation.activation
-          && window.navigation.activation.from
-          && window.navigation.activation.from.url;
-        if (!from) return;
+      (function () {
         var seg = function (p) {
           if (base && p.indexOf(base) === 0) p = p.slice(base.length);
           return p.split("/").filter(Boolean)[0];
         };
-        var was = seg(new URL(from).pathname);
-        var is_ = seg(location.pathname);
         var locales = ["en", "hu"];
-        if (locales.indexOf(was) > -1 && locales.indexOf(is_) > -1 && was !== is_) {
-          document.documentElement.dataset.vt = "flip";
-        } else {
-          e.viewTransition.skipTransition();
-        }
-      });
+        document.addEventListener("astro:before-swap", function (e) {
+          var was = seg(new URL(e.from).pathname);
+          var is_ = seg(new URL(e.to).pathname);
+          if (locales.indexOf(was) > -1 && locales.indexOf(is_) > -1 && was !== is_) {
+            e.newDocument.documentElement.dataset.vt = "flip";
+            document.documentElement.dataset.vt = "flip";
+          }
+        });
+        document.addEventListener("astro:page-load", function () {
+          // the dropped flag lives on <html>, which swaps — restore it
+          if (sessionStorage.getItem("jxn.dropped")) {
+            document.documentElement.classList.add("dropped");
+          }
+          window.setTimeout(function () {
+            delete document.documentElement.dataset.vt;
+          }, 700);
+        });
+      })();
     </script>
   </head>
   <body>
@@ -115,6 +125,9 @@ you're reading the source. correct instinct. stdin is open: press ~
 
     <div id="toast" role="status" aria-live="polite"></div>
     <pre id="cat-walk" aria-hidden="true"></pre>
+
+    {/* the deck: visible toys, persisted across the flip */}
+    <Deck client:idle transition:persist="deck" transition:persist-props />
 
     {variant === "default" && <script>import "@/scripts/needle";</script>}
     <script>import "@/scripts/eggs";</script>

@@ -1,0 +1,48 @@
+/* the engine room — shared by /status and the deck modal */
+
+.status-body {
+  padding: clamp(1.1rem, 3vw, 1.8rem);
+  display: grid;
+  gap: 1.4rem;
+}
+
+.st-live {
+  color: var(--status-live);
+}
+
+.st-tokens {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.st-grove pre {
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  line-height: 1.22;
+  margin: 0;
+  overflow-x: auto;
+  min-height: 17em;
+}
+
+.st-grove .b-leaf {
+  color: var(--accent);
+}
+
+.st-grove .b-trunk {
+  color: var(--gold);
+}
+
+.st-grove .b-pot {
+  color: var(--ink-2);
+}
+
+.st-note {
+  margin-top: 0.5rem;
+}
+
+.status-modal {
+  width: min(640px, 96vw);
+  max-height: 88svh;
+  overflow-y: auto;
+}

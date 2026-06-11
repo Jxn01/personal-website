@@ -16,58 +16,76 @@
 </div>
 
 <script>
-  const bar = document.getElementById("ph-bar");
-  const time = document.getElementById("ph-time");
-  const trackLabel = document.getElementById("ph-track");
-  const rail = document.getElementById("ph-rail");
-  const sections = [...document.querySelectorAll<HTMLElement>("[data-track]")];
-
-  const mmss = (s: number): string =>
-    `${String(Math.floor(s / 60)).padStart(2, "0")}:${String(Math.floor(s % 60)).padStart(2, "0")}`;
-
-  const total = sections.reduce((acc, el) => acc + Number(el.dataset.secs ?? 0), 0);
-
+  // ClientRouter-aware: module runs once, state re-binds on every page-load
   interface Mark {
     el: HTMLElement;
     label: string;
     frac: number;
   }
-  let marks: Mark[] = [];
+
+  const mmss = (s: number): string =>
+    `${String(Math.floor(s / 60)).padStart(2, "0")}:${String(Math.floor(s % 60)).padStart(2, "0")}`;
+
+  const state = {
+    bar: null as HTMLElement | null,
+    time: null as HTMLElement | null,
+    trackLabel: null as HTMLElement | null,
+    rail: null as HTMLElement | null,
+    marks: [] as Mark[],
+    total: 0,
+  };
 
   function measure(): void {
+    if (!state.rail) return;
+    const sections = [...document.querySelectorAll<HTMLElement>("[data-track]")];
     const scrollable = document.documentElement.scrollHeight - innerHeight;
-    if (scrollable <= 0 || !rail) return;
-    marks = sections.map((el) => ({
+    if (scrollable <= 0) return;
+    state.marks = sections.map((el) => ({
       el,
       label: `${el.dataset.no} — ${el.dataset.title}`,
       frac: Math.min(1, el.offsetTop / scrollable),
     }));
-    rail.querySelectorAll(".ph-tick").forEach((t) => t.remove());
-    for (const m of marks.slice(1)) {
+    state.rail.querySelectorAll(".ph-tick").forEach((t) => t.remove());
+    for (const m of state.marks.slice(1)) {
       const tick = document.createElement("button");
       tick.className = "ph-tick";
       tick.style.left = `${(m.frac * 100).toFixed(2)}%`;
       tick.title = m.label;
       tick.setAttribute("aria-label", m.label);
       tick.addEventListener("click", () => m.el.scrollIntoView({ behavior: "smooth" }));
-      rail.appendChild(tick);
+      state.rail.appendChild(tick);
     }
   }
 
   let raf = 0;
   function update(): void {
     raf = 0;
+    if (!state.bar) return;
     const scrollable = document.documentElement.scrollHeight - innerHeight;
     const p = scrollable > 0 ? Math.min(1, Math.max(0, scrollY / scrollable)) : 0;
-    if (bar) bar.style.width = `${(p * 100).toFixed(2)}%`;
-    if (time) time.textContent = `${mmss(total * p)} / ${mmss(total)}`;
-    if (trackLabel) {
-      let current = marks[0];
-      for (const m of marks) if (p >= m.frac - 0.001) current = m;
-      if (current && trackLabel.textContent !== current.label) {
-        trackLabel.textContent = current.label;
+    state.bar.style.width = `${(p * 100).toFixed(2)}%`;
+    if (state.time) {
+      state.time.textContent = `${mmss(state.total * p)} / ${mmss(state.total)}`;
+    }
+    if (state.trackLabel) {
+      let current = state.marks[0];
+      for (const m of state.marks) if (p >= m.frac - 0.001) current = m;
+      if (current && state.trackLabel.textContent !== current.label) {
+        state.trackLabel.textContent = current.label;
       }
     }
+  }
+
+  function init(): void {
+    state.bar = document.getElementById("ph-bar");
+    state.time = document.getElementById("ph-time");
+    state.trackLabel = document.getElementById("ph-track");
+    state.rail = document.getElementById("ph-rail");
+    if (!state.bar) return; // page without a playhead
+    const sections = [...document.querySelectorAll<HTMLElement>("[data-track]")];
+    state.total = sections.reduce((acc, el) => acc + Number(el.dataset.secs ?? 0), 0);
+    measure();
+    update();
   }
 
   addEventListener(
@@ -82,6 +100,6 @@
     update();
   });
 
-  measure();
-  update();
+  init();
+  document.addEventListener("astro:page-load", init);
 </script>
