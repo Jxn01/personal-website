@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { growBonsai, bonsaiToHtml } from "../lib/bonsai";
+import { withBase } from "../lib/url";
 import "./terminal.css";
 
 /**
@@ -191,13 +192,13 @@ export default function Terminal(): React.ReactElement | null {
       }
       out("flipping the record…");
       window.setTimeout(() => {
-        location.href = side === "a" ? "/en" : "/hu";
+        location.href = withBase(side === "a" ? "/en" : "/hu");
       }, 350);
     },
     status: () => {
       out("opening the engine room…");
       window.setTimeout(() => {
-        location.href = "/status";
+        location.href = withBase("/status");
       }, 350);
     },
     bonsai: () => {

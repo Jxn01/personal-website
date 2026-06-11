@@ -3,6 +3,10 @@
  * Root: pick a side. Hungarian browsers get SIDE B, everyone else SIDE A.
  * No-JS fallback: meta refresh to /en (canonical).
  */
+import { withBase } from "@/lib/url";
+
+const enHref = withBase("/en");
+const huHref = withBase("/hu");
 ---
 
 <!doctype html>
@@ -12,21 +16,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>JXN-000</title>
     <meta name="robots" content="noindex" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <script is:inline>
+    <link rel="icon" type="image/svg+xml" href={withBase("/favicon.svg")} />
+    <script is:inline define:vars={{ enHref, huHref }}>
       location.replace(
         (navigator.languages || [navigator.language || "en"]).some(function (l) {
           return String(l).toLowerCase().indexOf("hu") === 0;
         })
-          ? "/hu"
-          : "/en",
+          ? huHref
+          : enHref,
       );
     </script>
-    <meta http-equiv="refresh" content="0; url=/en" />
+    <meta http-equiv="refresh" content={`0; url=${enHref}`} />
   </head>
   <body>
     <p style="font-family: monospace; padding: 2rem">
-      JXN-000 — <a href="/en">SIDE A</a> · <a href="/hu">SIDE B</a>
+      JXN-000 — <a href={enHref}>SIDE A</a> · <a href={huHref}>SIDE B</a>
     </p>
   </body>
 </html>

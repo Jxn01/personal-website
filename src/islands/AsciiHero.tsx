@@ -73,7 +73,7 @@ export default function AsciiHero(): React.ReactElement {
     const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
     const styles = getComputedStyle(document.documentElement);
     const colors = {
-      accentDim: styles.getPropertyValue("--accent-faint").trim() || "#143b35",
+      accentDim: styles.getPropertyValue("--accent-dim").trim() || "#2a8d80",
       accent: styles.getPropertyValue("--accent-dim").trim() || "#2a8d80",
       accentHot: styles.getPropertyValue("--accent").trim() || "#41ead4",
       cream: styles.getPropertyValue("--cream").trim() || "#efe3c2",
@@ -219,7 +219,7 @@ export default function AsciiHero(): React.ReactElement {
             noise(x * 0.055 + t, y * 0.07 - t * 0.6) * 0.65 +
             noise(x * 0.16 - t * 0.4, y * 0.18 + t) * 0.35;
 
-          let v = (n - 0.46) * 1.9 + heat[idx]!;
+          let v = (n - 0.4) * 2.05 + heat[idx]!;
           if (v <= 0.04) continue;
           if (v > 1) v = 1;
 

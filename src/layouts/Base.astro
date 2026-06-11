@@ -4,6 +4,7 @@ import "@fontsource-variable/jetbrains-mono";
 import "@/styles/global.css";
 import type { Locale } from "@/i18n";
 import { getDict } from "@/i18n";
+import { BASE, withBase } from "@/lib/url";
 
 interface Props {
   locale: Locale;
@@ -18,7 +19,7 @@ const { locale, title, description, variant = "default" } = Astro.props;
 const dict = getDict(locale);
 const pageTitle = title ?? dict.meta.title;
 const pageDescription = description ?? dict.meta.description;
-const favicon = variant === "error" ? "/favicon-error.svg" : "/favicon.svg";
+const favicon = withBase(variant === "error" ? "/favicon-error.svg" : "/favicon.svg");
 
 // liner notes for those who view source — the cleanest room in the house
 const sourceNote = `
@@ -50,13 +51,13 @@ you're reading the source. correct instinct. stdin is open: press ~
     <meta property="og:description" content={pageDescription} />
     <meta property="og:type" content="website" />
     <link rel="icon" type="image/svg+xml" href={favicon} />
-    <link rel="author" href="/humans.txt" />
+    <link rel="author" href={withBase("/humans.txt")} />
     {
       // hreflang pairs — EN canonical, structure-identical HU
       variant === "default" && (
         <>
-          <link rel="alternate" hreflang="en" href="/en" />
-          <link rel="alternate" hreflang="hu" href="/hu" />
+          <link rel="alternate" hreflang="en" href={withBase("/en")} />
+          <link rel="alternate" hreflang="hu" href={withBase("/hu")} />
         </>
       )
     }
@@ -72,15 +73,21 @@ you're reading the source. correct instinct. stdin is open: press ~
     </script>
 
     {/* the record flip: only SIDE A ↔ SIDE B navigations get the theatrics */}
-    <script is:inline>
+    <script is:inline define:vars={{ base: BASE }}>
       window.addEventListener("pagereveal", function (e) {
         if (!e.viewTransition) return;
-        var from = window.navigation?.activation?.from?.url;
+        var from = window.navigation && window.navigation.activation
+          && window.navigation.activation.from
+          && window.navigation.activation.from.url;
         if (!from) return;
-        var was = new URL(from).pathname.split("/")[1];
-        var is_ = location.pathname.split("/")[1];
+        var seg = function (p) {
+          if (base && p.indexOf(base) === 0) p = p.slice(base.length);
+          return p.split("/").filter(Boolean)[0];
+        };
+        var was = seg(new URL(from).pathname);
+        var is_ = seg(location.pathname);
         var locales = ["en", "hu"];
-        if (locales.includes(was) && locales.includes(is_) && was !== is_) {
+        if (locales.indexOf(was) > -1 && locales.indexOf(is_) > -1 && was !== is_) {
           document.documentElement.dataset.vt = "flip";
         } else {
           e.viewTransition.skipTransition();

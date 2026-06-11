@@ -15,8 +15,16 @@ try {
   /* shallow or detached environments still get a build */
 }
 
+// Deploy target is env-driven. GitHub Pages project site serves from a
+// subpath; the eventual custom domain (jxn.ddns.net) serves from root.
+//   BASE_PATH=/personal-website  SITE=https://jxn01.github.io  → Pages
+//   (unset)                                                    → root "/"
+const BASE_PATH = process.env.BASE_PATH || "/";
+const SITE = process.env.SITE || "https://jxn.ddns.net";
+
 export default defineConfig({
-  site: "https://jxn.ddns.net",
+  site: SITE,
+  base: BASE_PATH,
   // SIDE A = en (canonical), SIDE B = hu. Faithful localization, structure-identical.
   i18n: {
     defaultLocale: "en",

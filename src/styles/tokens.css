@@ -12,21 +12,22 @@
 
 :root {
   /* — near-black base (spec: #0a0a0c–#101014, never pure black) ———————————— */
-  --bg-0: #0a0a0c; /* deepest — page base */
-  --bg-1: #0d0d10; /* raised surfaces */
-  --bg-2: #101014; /* cards / sleeves */
-  --bg-3: #16161b; /* hover / inset */
+  /* lifted one notch from the first cut — less void, still techwear-dark */
+  --bg-0: #101116; /* deepest — page base */
+  --bg-1: #15161c; /* raised surfaces */
+  --bg-2: #1a1b22; /* cards / sleeves */
+  --bg-3: #22232c; /* hover / inset */
 
   /* — ink scale (text on dark) ———————————————————————————————————————————— */
-  --ink-0: #f4f4f6; /* primary text */
-  --ink-1: #c7c7cd; /* body */
-  --ink-2: #8a8a93; /* muted / metadata */
-  --ink-3: #55555d; /* faint labels, disabled */
+  --ink-0: #f6f6f8; /* primary text */
+  --ink-1: #d2d2d9; /* body */
+  --ink-2: #9698a2; /* muted / metadata */
+  --ink-3: #62646e; /* faint labels, disabled */
 
   /* — hairlines & texture ————————————————————————————————————————————————— */
-  --line-0: rgba(255, 255, 255, 0.08); /* 1px borders */
-  --line-1: rgba(255, 255, 255, 0.04); /* grid / scanline */
-  --grain: rgba(255, 255, 255, 0.015); /* paper-grain on sleeves */
+  --line-0: rgba(255, 255, 255, 0.1); /* 1px borders */
+  --line-1: rgba(255, 255, 255, 0.05); /* grid / scanline */
+  --grain: rgba(255, 255, 255, 0.018); /* paper-grain on sleeves */
 
   /* — ACCENT · phosphor teal-cyan — the ONE cold accent ———————————————————— */
   --accent: #41ead4;

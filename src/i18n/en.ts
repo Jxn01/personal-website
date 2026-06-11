@@ -16,7 +16,7 @@ export const en: Dict = {
     skipToContent: "skip to content",
     sideTooltip: "EN / HU",
     statusLink: "status",
-    portraitLabel: "PORTRAIT.RAW — awaiting masters",
+    portraitLabel: "fig.01 · norbert oláh · budapest · duotone",
     trackLabel: "track",
   },
   hero: {

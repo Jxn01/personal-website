@@ -6,6 +6,7 @@ import Waveform from "@/components/Waveform.astro";
 import Playhead from "@/components/Playhead.astro";
 import AsciiHero from "@/islands/AsciiHero";
 import Terminal from "@/islands/Terminal";
+import Portrait from "@/components/Portrait.astro";
 import type { Locale } from "@/i18n";
 import { getDict, mmss, readingSeconds, trackNo } from "@/i18n";
 import { config } from "@/config";
@@ -83,9 +84,7 @@ const catalogNote = (cat: string) => `cat. no. ${cat} — from the crate`;
         <div class="reveal">
           {d.about.paras.map((p) => <p set:html={p} />)}
         </div>
-        <figure class="portrait reveal" aria-label={d.ui.portraitLabel}>
-          <figcaption class="stamp">{d.ui.portraitLabel}</figcaption>
-        </figure>
+        <Portrait label={d.ui.portraitLabel} />
       </div>
     </section>
 

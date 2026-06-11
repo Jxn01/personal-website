@@ -313,6 +313,18 @@ a:hover {
   display: flex;
   align-items: center;
   overflow: hidden;
+  /* a breath of phosphor in the room — keeps the void from swallowing it */
+  background:
+    radial-gradient(
+      ellipse 70% 60% at 18% 42%,
+      color-mix(in oklab, var(--accent) 8%, transparent),
+      transparent 70%
+    ),
+    radial-gradient(
+      ellipse 50% 40% at 85% 80%,
+      color-mix(in oklab, var(--gold) 5%, transparent),
+      transparent 70%
+    );
 }
 
 .hero-canvas {

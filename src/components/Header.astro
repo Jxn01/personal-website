@@ -1,6 +1,7 @@
 ---
 import type { Locale } from "@/i18n";
 import { getDict, otherLocale } from "@/i18n";
+import { withBase } from "@/lib/url";
 
 interface Props {
   locale: Locale;
@@ -21,13 +22,13 @@ const sides: { side: "A" | "B"; locale: Locale }[] = [
   <div class="container bar">
     <a
       class="catalog"
-      href={`/${locale}${path}`}
+      href={withBase(`/${locale}${path}`)}
       data-note={"cat. no. JXN-000 — this site"}
       aria-label="JXN-000 — home"
     >
       JXN-000
     </a>
-    <a class="mono head-status" href="/status">{dict.ui.statusLink}</a>
+    <a class="mono head-status" href={withBase("/status")}>{dict.ui.statusLink}</a>
 
     {/* A-side / B-side. The single best joke on the site. No explanation. */}
     <nav class="side-toggle" aria-label={dict.ui.sideTooltip} title={dict.ui.sideTooltip}>
@@ -36,7 +37,7 @@ const sides: { side: "A" | "B"; locale: Locale }[] = [
           s.locale === locale ? (
             <span aria-current="true">SIDE {s.side}</span>
           ) : (
-            <a href={`/${other}${path}`} hreflang={other} lang={other}>
+            <a href={withBase(`/${other}${path}`)} hreflang={other} lang={other}>
               SIDE {s.side}
             </a>
           ),

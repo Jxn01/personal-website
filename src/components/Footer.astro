@@ -2,6 +2,7 @@
 import type { Locale } from "@/i18n";
 import { getDict } from "@/i18n";
 import { config } from "@/config";
+import { withBase } from "@/lib/url";
 
 interface Props {
   locale: Locale;
@@ -38,7 +39,7 @@ const swatches = [
       </span>
       <span>JXN-000</span>
       <span class="stdin" title="stdin is open">stdin: ~</span>
-      <a href="/humans.txt">humans.txt</a>
+      <a href={withBase("/humans.txt")}>humans.txt</a>
     </div>
   </div>
 </footer>

@@ -1,5 +1,6 @@
 ---
 import Base from "@/layouts/Base.astro";
+import { withBase } from "@/lib/url";
 
 /**
  * TRACK NOT FOUND. The only red on the site — red is a system state,
@@ -49,8 +50,8 @@ const hex = hexRows(48, 24);
           <span class="err-msg-hu">a tű megugrott. ez a barázda nem létezik.</span>
         </p>
         <div class="err-actions">
-          <a class="err-btn" href="/en">OK</a>
-          <a class="err-btn" href="/en" title="there is no no.">NO</a>
+          <a class="err-btn" href={withBase("/en")}>OK</a>
+          <a class="err-btn" href={withBase("/en")} title="there is no no.">NO</a>
         </div>
       </div>
     </div>

@@ -17,7 +17,7 @@ export const hu: Dict = {
     skipToContent: "ugrás a tartalomra",
     sideTooltip: "EN / HU",
     statusLink: "status",
-    portraitLabel: "PORTRAIT.RAW — master később",
+    portraitLabel: "fig.01 · oláh norbert · budapest · duotone",
     trackLabel: "track",
   },
   hero: {

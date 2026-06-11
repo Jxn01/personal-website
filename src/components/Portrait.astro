@@ -1,0 +1,157 @@
+---
+import { Image } from "astro:assets";
+import portrait from "@/assets/portrait.jpeg";
+
+/**
+ * The portrait. Warm human on a cold site = intended tension (spec 1.2).
+ * Treatment: a three-stop duotone (near-black shadows → teal mids → cream
+ * highlights) so it sits in the palette without losing the smirk. Halftone
+ * dot screen + scanlines for the print-artifact register. On scroll it
+ * "resolves" — dithered/blurred → clean — the B3-04 reference, live.
+ *
+ * The chain glint: a soft gold wash low-right, where the necklace catches
+ * light. Jewelry on the techwear, in the image itself.
+ */
+interface Props {
+  label: string;
+}
+const { label } = Astro.props;
+---
+
+{/* duotone filter — luminance, then map the tonal range across 3 stops */}
+<svg width="0" height="0" aria-hidden="true" class="portrait-defs">
+  <filter id="jxn-duotone" color-interpolation-filters="sRGB">
+    <feColorMatrix
+      type="matrix"
+      values="0.33 0.33 0.33 0 0
+              0.33 0.33 0.33 0 0
+              0.33 0.33 0.33 0 0
+              0    0    0    1 0"
+    ></feColorMatrix>
+    <feComponentTransfer>
+      <!-- shadows #0a0a0c · mids ~teal · highlights cream #efe3c2 -->
+      <feFuncR type="table" tableValues="0.039 0.090 0.937"></feFuncR>
+      <feFuncG type="table" tableValues="0.039 0.520 0.890"></feFuncG>
+      <feFuncB type="table" tableValues="0.047 0.510 0.760"></feFuncB>
+    </feComponentTransfer>
+  </filter>
+</svg>
+
+<figure class="portrait reveal" aria-label={label}>
+  <div class="portrait-frame">
+    <Image
+      src={portrait}
+      alt="Norbert Oláh"
+      widths={[360, 540, 720]}
+      sizes="(max-width: 840px) 80vw, 320px"
+      class="portrait-img"
+      loading="lazy"
+    />
+    <span class="portrait-dots" aria-hidden="true"></span>
+    <span class="portrait-scan" aria-hidden="true"></span>
+    <span class="portrait-glint" aria-hidden="true"></span>
+  </div>
+  <figcaption class="stamp">{label}</figcaption>
+</figure>
+
+<style>
+  .portrait-defs {
+    position: absolute;
+    width: 0;
+    height: 0;
+  }
+
+  .portrait {
+    position: relative;
+    border: 1px solid var(--line-0);
+    background: var(--bg-2);
+    padding: 0.5rem;
+    display: grid;
+    gap: 0.6rem;
+  }
+
+  /* sleeve-mount: image inset in a flat field, never full-bleed (B2-05) */
+  .portrait-frame {
+    position: relative;
+    aspect-ratio: 1378 / 2121;
+    overflow: hidden;
+    border-radius: var(--radius);
+    background: var(--bg-0);
+    isolation: isolate;
+  }
+
+  .portrait-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: 50% 28%;
+    filter: url(#jxn-duotone) contrast(1.05);
+    /* starts "unresolved": desaturated, slightly soft, low — resolves on scroll */
+    opacity: 0.001;
+    scale: 1.06;
+    transition:
+      opacity var(--beat) var(--ease-out),
+      scale var(--beat) var(--ease-out),
+      filter var(--beat) var(--ease-out);
+  }
+
+  :global(.portrait.in) .portrait-img {
+    opacity: 1;
+    scale: 1;
+  }
+
+  /* halftone dot screen — the print artifact, in cream */
+  .portrait-dots {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    pointer-events: none;
+    background-image: radial-gradient(
+      color-mix(in oklab, var(--cream) 40%, transparent) 28%,
+      transparent 29%
+    );
+    background-size: 4px 4px;
+    mix-blend-mode: overlay;
+    opacity: 0.35;
+  }
+
+  .portrait-scan {
+    position: absolute;
+    inset: 0;
+    z-index: 3;
+    pointer-events: none;
+    background: repeating-linear-gradient(
+      to bottom,
+      transparent 0 2px,
+      rgba(0, 0, 0, 0.16) 3px,
+      transparent 4px
+    );
+    opacity: 0.5;
+  }
+
+  /* the chain glint — soft gold where the necklace catches light */
+  .portrait-glint {
+    position: absolute;
+    inset: 0;
+    z-index: 4;
+    pointer-events: none;
+    background: radial-gradient(
+      ellipse 38% 16% at 52% 82%,
+      color-mix(in oklab, var(--gold) 38%, transparent),
+      transparent 70%
+    );
+    mix-blend-mode: screen;
+  }
+
+  .portrait figcaption {
+    justify-self: start;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .portrait-img {
+      opacity: 1;
+      scale: 1;
+      transition: none;
+    }
+  }
+</style>
