@@ -3,6 +3,11 @@
  * everyone scrolls past it. Paint lives in page coordinates (it stays where
  * you put it), persists in localStorage at half resolution, and survives
  * soft navigations because we re-hang the canvas after every swap.
+ *
+ * The canvas is position:absolute, so its height must NEVER be derived from
+ * scrollHeight while it is in the DOM — scrollHeight includes the canvas, so
+ * that would ratchet the page taller every measure and leave a blank gap.
+ * We collapse the canvas before measuring real content height.
  */
 
 const STORE = "jxn.wall";
@@ -14,8 +19,26 @@ export function wallCanvas(): HTMLCanvasElement | null {
   return canvas;
 }
 
-function docHeight(): number {
-  return Math.max(document.documentElement.scrollHeight, innerHeight);
+/** Real content height, measured with the wall collapsed so it can't inflate it. */
+function contentHeight(): number {
+  const c = document.getElementById(ID) as HTMLCanvasElement | null;
+  let prevH = "";
+  let prevD = "";
+  if (c) {
+    prevH = c.style.height;
+    prevD = c.style.display;
+    c.style.display = "none"; // out of the box model entirely while we measure
+  }
+  const h = Math.max(
+    document.body.scrollHeight,
+    document.documentElement.scrollHeight,
+    window.innerHeight,
+  );
+  if (c) {
+    c.style.display = prevD;
+    c.style.height = prevH;
+  }
+  return h;
 }
 
 /** Create (or re-hang) the wall over the current document and restore paint. */
@@ -29,10 +52,10 @@ export function mountWall(): void {
 
   canvas = document.createElement("canvas");
   canvas.id = ID;
-  canvas.width = Math.max(1, document.documentElement.clientWidth);
-  canvas.height = docHeight();
   canvas.setAttribute("aria-hidden", "true");
   document.body.appendChild(canvas);
+  canvas.width = Math.max(1, document.documentElement.clientWidth);
+  canvas.height = contentHeight();
   restore();
 }
 
@@ -40,7 +63,7 @@ export function mountWall(): void {
 export function resizeWall(): void {
   if (!canvas) return;
   const w = Math.max(1, document.documentElement.clientWidth);
-  const h = docHeight();
+  const h = contentHeight();
   if (canvas.width === w && canvas.height === h) return;
   const keep = document.createElement("canvas");
   keep.width = canvas.width;
@@ -71,9 +94,7 @@ function restore(): void {
   if (!saved || !canvas) return;
   const img = new Image();
   img.onload = () => {
-    canvas
-      ?.getContext("2d")
-      ?.drawImage(img, 0, 0, img.width * 2, img.height * 2);
+    canvas?.getContext("2d")?.drawImage(img, 0, 0, img.width * 2, img.height * 2);
   };
   img.src = saved;
 }

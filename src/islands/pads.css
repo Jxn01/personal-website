@@ -90,3 +90,27 @@
   margin-left: auto;
   max-width: 24rem;
 }
+
+/* mobile: the whole kit fits the screen — no horizontal scroll, ever.
+   `.pads .pads-row` (0,2,0) outranks every base/global single-class rule,
+   so this wins no matter how the two stylesheets end up ordered. */
+@media (max-width: 640px) {
+  .pads .pads-grid {
+    overflow: visible;
+  }
+
+  .pads .pads-row {
+    grid-template-columns: 2.1rem repeat(var(--steps), minmax(0, 1fr));
+    gap: 0.16rem;
+  }
+
+  .pads .pads-cell {
+    min-width: 0;
+    aspect-ratio: auto;
+    height: 1.7rem;
+  }
+
+  .pads .pads-voice {
+    font-size: 0.56rem;
+  }
+}

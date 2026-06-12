@@ -766,50 +766,90 @@ html.dropped #needle {
   translate: 0 0;
 }
 
-/* — the record flip (hand-rolled, identical in every browser) ————————————— */
-/* SIDE A ↔ SIDE B: one full beat — 333ms out, edge-on while loading, 333ms in */
-html.flip-out body {
-  animation: page-flip-out var(--beat-half) var(--ease-in-out) both;
-  pointer-events: none;
-}
-
-html.flip-in body {
-  animation: page-flip-in var(--beat-half) var(--ease-in-out) both;
-}
-
-@keyframes page-flip-out {
-  to {
-    transform: perspective(1300px) rotateY(-87deg);
-    opacity: 0.5;
-  }
-}
-
-@keyframes page-flip-in {
-  from {
-    transform: perspective(1300px) rotateY(87deg);
-    opacity: 0.5;
-  }
-}
-
-/* while the record is on edge, the label keeps the beat */
-html.flip-out::after,
-html.flip-in::after {
-  content: "JXN-000 ◌ flipping";
+/* — the record flip — a cover panel rotates, the page never does —————————— */
+#flip-cover {
   position: fixed;
-  inset: 50% auto auto 50%;
-  translate: -50% -50%;
-  z-index: 99;
-  font-family: var(--font-mono);
-  font-size: 0.78rem;
-  letter-spacing: 0.3em;
-  color: var(--gold);
-  animation: flip-label-pulse var(--beat) var(--ease-in-out) infinite;
+  inset: 0;
+  z-index: 95;
+  display: grid;
+  place-items: center;
+  background: var(--bg-0);
+  transform-origin: center center;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  will-change: transform;
+  /* parked: edge-on, hidden, inert */
+  transform: perspective(1600px) rotateY(90deg);
+  visibility: hidden;
   pointer-events: none;
+}
+
+#flip-cover.on {
+  visibility: visible;
+  pointer-events: auto;
+}
+
+/* a faint print texture so the on-edge record reads as an object */
+#flip-cover::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(var(--line-1) 1px, transparent 1px);
+  background-size: 24px 24px;
+  opacity: 0.5;
+}
+
+.flip-cover-inner {
+  position: relative;
+  text-align: center;
+  font-family: var(--font-mono);
+  animation: flip-label-pulse var(--beat) var(--ease-in-out) infinite;
+}
+
+.flip-mark {
+  display: block;
+  font-size: clamp(1.4rem, 6vw, 2.2rem);
+  letter-spacing: 0.34em;
+  color: var(--gold);
+  text-indent: 0.34em;
+}
+
+.flip-sub {
+  display: block;
+  margin-top: 0.7rem;
+  font-size: 0.74rem;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+}
+
+.flip-sub::before {
+  content: "◌ ";
+  color: var(--accent);
 }
 
 @keyframes flip-label-pulse {
   50% {
-    opacity: 0.35;
+    opacity: 0.45;
+  }
+}
+
+/* the boot overlay must never flash during a flip */
+html.flipping #needle {
+  display: none !important;
+}
+
+/* instant scroll during a flip so the restore loop can't be fought by smooth */
+html.flipping {
+  scroll-behavior: auto;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #flip-cover {
+    transition: none !important;
+  }
+  .flip-cover-inner {
+    animation: none;
   }
 }
 
@@ -1396,11 +1436,7 @@ main > .track:nth-of-type(3n + 1):not(.hero) .track-head h2 {
    V3.1 — phone patch + hero legibility
    ========================================================================== */
 
-/* never let the boot overlay flash during a flip */
-html.flip-out #needle,
-html.flip-in #needle {
-  display: none !important;
-}
+/* (boot overlay during flip handled by html.flipping #needle above) */
 
 /* — hero text protection: a soft pool of dark under the copy ————————————— */
 .hero-inner {
@@ -1445,14 +1481,6 @@ html.flip-in #needle {
   /* calmer signal behind small text */
   .crt::after {
     opacity: calc(0.5 * var(--fx-scan));
-  }
-}
-
-/* — about: keep the sleeve comfortably inside the column ————————————————— */
-@media (max-width: 840px) {
-  .about-grid .portrait {
-    max-width: min(300px, 82vw);
-    justify-self: start;
   }
 }
 
@@ -1544,5 +1572,104 @@ html.flip-in #needle {
 @media (pointer: coarse) {
   .term-chips {
     display: flex;
+  }
+}
+
+/* ============================================================================
+   V3.2 — native mobile sheets. on a phone the toys are full-screen panels
+   that slide up, not tiny draggable windows. nothing scrolls that shouldn't.
+   ========================================================================== */
+
+@media (max-width: 640px) {
+  .ov-backdrop {
+    padding: 0;
+    align-items: stretch;
+    justify-items: stretch;
+  }
+
+  .ov-window {
+    width: 100vw;
+    height: 100svh;
+    max-width: none;
+    max-height: none;
+    border: none;
+    border-radius: 0;
+    display: flex;
+    flex-direction: column;
+    animation: sheet-up 280ms var(--ease-out);
+  }
+
+  @keyframes sheet-up {
+    from {
+      transform: translateY(6%);
+      opacity: 0.4;
+    }
+  }
+
+  /* a fat, obvious title bar with a real tap target to close */
+  .window-bar {
+    padding: 0.9rem 1rem;
+    font-size: 0.82rem;
+    flex-shrink: 0;
+    padding-top: max(0.9rem, env(safe-area-inset-top));
+  }
+
+  .win-close {
+    font-size: 1.5rem;
+    line-height: 1;
+    padding: 0 0.4rem;
+  }
+
+  /* terminal: body grows, input + chips pinned, breathing room for the keyboard */
+  .term .term-body {
+    font-size: 0.82rem;
+  }
+
+  .term .term-input-row {
+    padding-bottom: max(0.55rem, env(safe-area-inset-bottom));
+  }
+
+  /* pads: fill the sheet; cell sizing lives in pads.css (higher specificity) */
+  .pads-body {
+    flex: 1;
+    justify-content: center;
+  }
+
+  .pads-controls {
+    justify-content: center;
+  }
+
+  .pads-note {
+    display: none; /* the kit speaks for itself on a small screen */
+  }
+
+  /* mixer + status: full-height, scroll only the body if genuinely long */
+  .mixer,
+  .status-modal {
+    width: 100vw;
+  }
+
+  .mixer-body {
+    flex: 1;
+    align-content: center;
+  }
+
+  .status-body {
+    flex: 1;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* the spray toolbar floats above the home-bar */
+  .spray-tools {
+    bottom: max(1rem, env(safe-area-inset-bottom));
+    flex-wrap: wrap;
+    justify-content: center;
+    max-width: 94vw;
+  }
+
+  /* the deck sits clear of the playhead + home indicator */
+  .deck {
+    bottom: max(3.6rem, calc(2.6rem + env(safe-area-inset-bottom)));
   }
 }

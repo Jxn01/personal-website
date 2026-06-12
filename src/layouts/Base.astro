@@ -107,6 +107,14 @@ the toys are in the deck, bottom right. the terminal also answers to ~
     <div id="toast" role="status" aria-live="polite"></div>
     <pre id="cat-walk" aria-hidden="true"></pre>
 
+    {/* the record flip cover — persisted so it survives the page swap it covers */}
+    <div id="flip-cover" aria-hidden="true" transition:persist>
+      <div class="flip-cover-inner">
+        <span class="flip-mark">JXN-000</span>
+        <span class="flip-sub">flipping the record</span>
+      </div>
+    </div>
+
     {/* the deck: visible toys, persisted across the flip */}
     <Deck client:idle transition:persist="deck" transition:persist-props />
 

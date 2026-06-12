@@ -4,11 +4,14 @@ import portrait from "@/assets/portrait.jpeg";
 
 /**
  * The portrait. Warm human on a cold site = intended tension (spec 1.2).
- * Duotone is done in CSS (grayscale base + a color-blend tint of the live
- * accent), so the photo re-inks itself with the side, and with the mixer:
- * pink on SIDE A, peach on SIDE B, whatever you fade it to in MIX.
- * Halftone dot screen + scanlines keep the print-artifact register; a soft
- * gold wash sits where the chain catches light. Jewelry on the techwear.
+ * Duotone via two CSS blend layers (proven to render): a color-tint of the
+ * live accent + a shade that seats the shadows in page-black. So the photo
+ * re-inks with the side and the mixer. Halftone dots + scanlines for the
+ * print register; a gold wash where the chain catches light.
+ *
+ * Sizing: the figure caps its own width and clips, so the image (normal flow,
+ * its own ratio) can never escape — fixes the iOS overflow without the
+ * aspect-ratio/absolute combo that refused to paint.
  */
 interface Props {
   label: string;
@@ -21,8 +24,8 @@ const { label } = Astro.props;
     <Image
       src={portrait}
       alt="Norbert Oláh"
-      widths={[360, 540, 720]}
-      sizes="(max-width: 840px) 80vw, 320px"
+      widths={[300, 450, 600]}
+      sizes="(max-width: 840px) 78vw, 300px"
       class="portrait-img"
       loading="lazy"
     />
@@ -43,33 +46,36 @@ const { label } = Astro.props;
     padding: 0.5rem;
     display: grid;
     gap: 0.6rem;
+    /* deterministic width on every screen; clip is the safety net */
+    width: 100%;
+    max-width: 300px;
+    overflow: hidden;
+    justify-self: start;
   }
 
-  /* sleeve-mount: image inset in a flat field, never full-bleed (B2-05) */
+  /* sleeve-mount: image inset in a flat field. The image (normal flow) sizes
+     the frame by its own ratio; the figure above caps + clips it. */
   .portrait-frame {
     position: relative;
     overflow: hidden;
     border-radius: var(--radius);
     background: var(--bg-0);
     isolation: isolate;
-    /* the image's own ratio sizes the frame — no Safari escape acts */
     line-height: 0;
   }
 
   .portrait-img {
+    display: block;
     width: 100%;
     height: auto;
     filter: grayscale(1) contrast(1.1) brightness(1.04);
-    /* resolves on scroll: soft and zoomed → sharp and seated */
-    opacity: 0.001;
-    scale: 1.06;
-    transition:
-      opacity var(--beat) var(--ease-out),
-      scale var(--beat) var(--ease-out);
+    /* always visible (never gated behind JS); the resolve is a gentle settle */
+    opacity: 1;
+    scale: 1.05;
+    transition: scale var(--beat) var(--ease-out);
   }
 
   :global(.portrait.in) .portrait-img {
-    opacity: 1;
     scale: 1;
   }
 
@@ -91,7 +97,7 @@ const { label } = Astro.props;
     pointer-events: none;
     background: var(--bg-0);
     mix-blend-mode: multiply;
-    opacity: 0.22;
+    opacity: 0.2;
   }
 
   /* halftone dot screen — the print artifact */
@@ -143,7 +149,6 @@ const { label } = Astro.props;
 
   @media (prefers-reduced-motion: reduce) {
     .portrait-img {
-      opacity: 1;
       scale: 1;
       transition: none;
     }

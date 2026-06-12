@@ -47,3 +47,24 @@
   max-height: 88svh;
   overflow-y: auto;
 }
+
+
+/* mobile: keep the key:value readout inside the sheet (1fr can't shrink alone) */
+@media (max-width: 640px) {
+  .status-body {
+    overflow-x: hidden;
+  }
+
+  .readout {
+    grid-template-columns: max-content minmax(0, 1fr);
+    column-gap: 0.9rem;
+  }
+
+  .readout dd {
+    overflow-wrap: anywhere;
+  }
+
+  .st-grove pre {
+    font-size: 0.6rem;
+  }
+}
