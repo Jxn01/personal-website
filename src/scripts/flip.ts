@@ -32,6 +32,8 @@ const HOLE_OPEN = "152%"; // iris fully open (page visible)
 const HOLE_SHUT = "16%"; // iris closed around the disc
 const SCALE_PAGE = 1.55; // disc scale when "is the page" (zoomed in)
 const SCALE_DISC = 0.62; // disc scale at the bottom of the tunnel
+const BLUR_NONE = "0px"; // page sharp (fully zoomed in)
+const BLUR_MAX = "22px"; // page heavily blurred down the tunnel
 
 const EASE_IN = "cubic-bezier(.6, 0, .9, .25)"; // accelerate down the tunnel
 const EASE_OUT = "cubic-bezier(.1, .75, .35, 1)"; // accelerate out, settle
@@ -49,6 +51,8 @@ let lastAnchor: Anchor | null = null;
 const stage = (): HTMLElement | null => document.getElementById(STAGE_ID);
 const veil = (): HTMLElement | null =>
   stage()?.querySelector(".flip-veil") ?? null;
+const blurLayer = (): HTMLElement | null =>
+  stage()?.querySelector(".flip-blur") ?? null;
 const disc = (): HTMLElement | null =>
   stage()?.querySelector(".flip-disc") ?? null;
 const disc3d = (): HTMLElement | null =>
@@ -117,12 +121,21 @@ function run(
 }
 
 /** Park the stage in a known state without animating. */
-function setStage(opts: { hole: string; scale: number; discOpacity: number; capOpacity: number; rotate: number }): void {
+function setStage(opts: {
+  hole: string;
+  scale: number;
+  discOpacity: number;
+  capOpacity: number;
+  rotate: number;
+  blur: string;
+}): void {
   const v = veil();
   const d = disc();
   const d3 = disc3d();
   const c = caption();
+  const bl = blurLayer();
   if (v) v.style.setProperty("--flip-hole", opts.hole);
+  if (bl) bl.style.setProperty("--flip-blur", opts.blur);
   if (d) {
     d.style.transform = `scale(${opts.scale})`;
     d.style.opacity = String(opts.discOpacity);
@@ -146,13 +159,14 @@ export function flipTo(href: string): void {
   sessionStorage.setItem(ANCHOR_KEY, JSON.stringify(lastAnchor));
   sessionStorage.setItem(PENDING_KEY, toB ? "B" : "A");
 
-  // prime: iris open, disc large + invisible (it IS the page), flat, no caption
-  setStage({ hole: HOLE_OPEN, scale: SCALE_PAGE, discOpacity: 0, capOpacity: 0, rotate: 0 });
+  // prime: iris open, disc large + invisible (it IS the page), flat, sharp page
+  setStage({ hole: HOLE_OPEN, scale: SCALE_PAGE, discOpacity: 0, capOpacity: 0, rotate: 0, blur: BLUR_NONE });
   st.classList.add("on");
 
-  // ACT 1 — the tunnel closes, the page recedes, a vinyl coalesces
+  // ACT 1 — the tunnel closes, the page recedes + blurs, a vinyl coalesces
   void Promise.all([
     run(veil(), [{ "--flip-hole": HOLE_OPEN } as Keyframe, { "--flip-hole": HOLE_SHUT } as Keyframe], ENTER_MS, EASE_IN),
+    run(blurLayer(), [{ "--flip-blur": BLUR_NONE } as Keyframe, { "--flip-blur": BLUR_MAX } as Keyframe], ENTER_MS, EASE_IN),
     run(
       disc(),
       [
@@ -165,7 +179,7 @@ export function flipTo(href: string): void {
     run(caption(), [{ opacity: 0 }, { opacity: 1 }], ENTER_MS, EASE_OUT),
   ]).then(() => {
     // hold the closed state and swap the page underneath the disc
-    setStage({ hole: HOLE_SHUT, scale: SCALE_DISC, discOpacity: 1, capOpacity: 1, rotate: 0 });
+    setStage({ hole: HOLE_SHUT, scale: SCALE_DISC, discOpacity: 1, capOpacity: 1, rotate: 0, blur: BLUR_MAX });
     void navigate(href);
   });
 }
@@ -206,7 +220,7 @@ async function finishFlip(): Promise<void> {
 
   // make sure we're parked closed over the fresh page
   st.classList.add("on");
-  setStage({ hole: HOLE_SHUT, scale: SCALE_DISC, discOpacity: 1, capOpacity: 1, rotate: 0 });
+  setStage({ hole: HOLE_SHUT, scale: SCALE_DISC, discOpacity: 1, capOpacity: 1, rotate: 0, blur: BLUR_MAX });
 
   const dir = pending === "B" ? 1 : -1; // A→B spins one way, B→A mirrors it
 
@@ -221,10 +235,11 @@ async function finishFlip(): Promise<void> {
     EASE_SPIN,
   );
 
-  // ACT 3 — the iris opens fast, the disc zooms up and dissolves into the page
+  // ACT 3 — the iris opens fast, the page sharpens, the disc dissolves away
   pin();
   await Promise.all([
     run(veil(), [{ "--flip-hole": HOLE_SHUT } as Keyframe, { "--flip-hole": HOLE_OPEN } as Keyframe], EXIT_MS, EASE_OUT),
+    run(blurLayer(), [{ "--flip-blur": BLUR_MAX } as Keyframe, { "--flip-blur": BLUR_NONE } as Keyframe], EXIT_MS, EASE_OUT),
     run(
       disc(),
       [
@@ -242,7 +257,7 @@ async function finishFlip(): Promise<void> {
   ro.disconnect();
   st.classList.remove("on");
   // reset for next time
-  setStage({ hole: HOLE_OPEN, scale: SCALE_PAGE, discOpacity: 0, capOpacity: 0, rotate: 0 });
+  setStage({ hole: HOLE_OPEN, scale: SCALE_PAGE, discOpacity: 0, capOpacity: 0, rotate: 0, blur: BLUR_NONE });
   if (disc3d()) disc3d()!.style.transform = "rotateY(0deg)";
   document.documentElement.classList.remove("flipping");
   busy = false;

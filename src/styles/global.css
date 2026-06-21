@@ -775,12 +775,29 @@ html.dropped #needle {
   initial-value: 152%;
 }
 
+/* how hard the page-in-the-ring is blurred (ramps with the tunnel) */
+@property --flip-blur {
+  syntax: "<length>";
+  inherits: false;
+  initial-value: 0px;
+}
+
 #flip-stage {
   position: fixed;
   inset: 0;
   z-index: 95;
   pointer-events: none;
   visibility: hidden;
+}
+
+/* heavy blur on the live page; the veil's black ring masks it everywhere
+   except the iris hole, so only the visible ring of page goes soft */
+.flip-blur {
+  position: absolute;
+  inset: 0;
+  --flip-blur: 0px;
+  backdrop-filter: blur(var(--flip-blur));
+  -webkit-backdrop-filter: blur(var(--flip-blur));
 }
 
 #flip-stage.on {
