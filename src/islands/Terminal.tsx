@@ -1,14 +1,27 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { growBonsai, bonsaiToHtml } from "../lib/bonsai";
 import { withBase } from "../lib/url";
+import {
+  HOME,
+  type FsDir,
+  type FsNode,
+  type Locale,
+  isDir,
+  nodeAt,
+  promptPath,
+  readFile,
+  resolvePath,
+} from "../lib/fs";
+import { strings } from "../lib/term-strings";
 import type { OverlayId } from "./Deck";
 import "./terminal.css";
 
 /**
- * The terminal. Lives in the deck (and answers to ~ / `). It reads the actual
- * page for `ls`/`cat`, reports the actual build for `uptime`, grows actual
- * trees, and can reach every other toy in the deck.
- * Machines speak English; the terminal is EN on both sides of the record.
+ * The terminal. Lives in the deck (and answers to ~ / `). It carries a small
+ * navigable filesystem (cd / ls / tree / cat / find / pwd), reaches every toy
+ * in the deck, and follows the selected language — read live, so flipping the
+ * record re-localises it on the spot. Command NAMES stay English; every dev
+ * types `ls`.
  */
 
 type LineKind = "in" | "out" | "err" | "raw";
@@ -22,25 +35,14 @@ interface Line {
 const esc = (s: string): string =>
   s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
-function pageSections(): { no: string; title: string; el: HTMLElement }[] {
-  return [...document.querySelectorAll<HTMLElement>("[data-track]")].map((el) => ({
-    no: el.dataset.no ?? "??",
-    title: (el.dataset.title ?? "untitled").toLowerCase().replace(/[^a-z0-9]+/g, "-"),
-    el,
-  }));
-}
+/** Live locale — re-read each command so the flip re-localises the terminal. */
+const loc = (): Locale => (document.documentElement.lang === "hu" ? "hu" : "en");
 
 const CAT = String.raw`   /\_/\   ___
   ( o.o ) (_  \
    |_T_|    )  ) ~ meow.
   /     \  (  (
  (_(_)_(_)__)_)`;
-
-const GLORIA = String.raw`        ______
-   ____/__||__\_____
-  |    GLORIA       \\
-  |__________________\\
-   (__)         (__)      "say hi."`;
 
 const JXN_ART = String.raw`     ██╗██╗  ██╗███╗   ██╗
      ██║╚██╗██╔╝████╗  ██║
@@ -57,10 +59,62 @@ function fmtUptime(): string {
   return `${d}d ${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
 }
 
-// session memory: closing the window doesn't wipe the scrollback
+/* — filesystem rendering (HTML, with register colours) —————————————————————— */
+
+function sortedNames(dir: FsDir, all: boolean): string[] {
+  return Object.keys(dir.children)
+    .filter((n) => all || !dir.children[n]!.hidden)
+    .sort((a, b) => {
+      const da = dir.children[a]!.type === "dir";
+      const db = dir.children[b]!.type === "dir";
+      if (da !== db) return da ? -1 : 1;
+      return a.localeCompare(b);
+    });
+}
+
+function nameSpan(name: string, node: FsNode): string {
+  const cls = node.hidden ? "t-dim" : node.type === "dir" ? "t-accent" : "";
+  return `<span class="${cls}">${esc(name)}${node.type === "dir" ? "/" : ""}</span>`;
+}
+
+function lsHtml(dir: FsDir, all: boolean, emptyLabel: string): string {
+  const names = sortedNames(dir, all);
+  if (!names.length) return `<span class="t-dim">${emptyLabel}</span>`;
+  return names.map((n) => nameSpan(n, dir.children[n]!)).join("   ");
+}
+
+function treeLines(dir: FsDir, all: boolean, prefix: string): string[] {
+  const names = sortedNames(dir, all);
+  const out: string[] = [];
+  names.forEach((n, i) => {
+    const last = i === names.length - 1;
+    const node = dir.children[n]!;
+    out.push(`${prefix}${last ? "└── " : "├── "}${nameSpan(n, node)}`);
+    if (node.type === "dir") {
+      out.push(...treeLines(node, all, prefix + (last ? "    " : "│   ")));
+    }
+  });
+  return out;
+}
+
+function findLines(dir: FsDir, term: string, base: string, acc: string[]): void {
+  for (const name of Object.keys(dir.children)) {
+    const node = dir.children[name]!;
+    const path = `${base}/${name}`;
+    if (name.toLowerCase().includes(term.toLowerCase())) {
+      acc.push(
+        `<span class="${node.type === "dir" ? "t-accent" : ""}">${esc(path)}${node.type === "dir" ? "/" : ""}</span>`,
+      );
+    }
+    if (node.type === "dir") findLines(node, term, path, acc);
+  }
+}
+
+// session memory: closing the window keeps scrollback, history AND the cwd
 let scrollback: Line[] = [];
 let history: string[] = [];
 let lineSeq = 0;
+let cwd = HOME;
 
 // mailbox: the deck queues a command, the terminal runs it on mount
 let queued: string | null = null;
@@ -77,6 +131,7 @@ export default function Terminal({ onClose, onOverlay }: Props): React.ReactElem
   const [lines, setLines] = useState<Line[]>(scrollback);
   const [value, setValue] = useState("");
   const [busy, setBusy] = useState(false);
+  const [prompt, setPrompt] = useState(promptPath(cwd));
   const histIdx = useRef(history.length);
   const inputRef = useRef<HTMLInputElement>(null);
   const bodyRef = useRef<HTMLDivElement>(null);
@@ -96,9 +151,7 @@ export default function Terminal({ onClose, onOverlay }: Props): React.ReactElem
   useEffect(() => {
     inputRef.current?.focus();
     if (scrollback.length === 0) {
-      raw(
-        `<span class="t-dim">jxn-000 terminal — type <span class="t-accent">help</span>. or don't. exploration is respected.</span>`,
-      );
+      raw(`<span class="t-dim">${strings(loc()).banner}</span>`);
     }
     if (queued) {
       const cmd = queued;
@@ -113,28 +166,90 @@ export default function Terminal({ onClose, onOverlay }: Props): React.ReactElem
     bodyRef.current?.scrollTo({ top: bodyRef.current.scrollHeight });
   }, [lines]);
 
+  const lookup = (arg: string | undefined): { path: string; node: FsNode | null } => {
+    const path = resolvePath(cwd, arg);
+    return { path, node: nodeAt(path) };
+  };
+
   const commands: Record<string, (args: string[]) => void> = {
     help: () => {
-      raw(
-        [
-          `<span class="t-accent">help</span>      this`,
-          `<span class="t-accent">fetch</span>     system info`,
-          `<span class="t-accent">ls</span>        list tracks`,
-          `<span class="t-accent">cat</span> <span class="t-dim">&lt;n&gt;</span>   read a track (number or name)`,
-          `<span class="t-accent">uptime</span>    since last master`,
-          `<span class="t-accent">bonsai</span>    grow one`,
-          `<span class="t-accent">pads</span>      open the drum machine`,
-          `<span class="t-accent">tag</span>       open the spray can`,
-          `<span class="t-accent">mix</span>       open the mixer`,
-          `<span class="t-accent">status</span>    the engine room`,
-          `<span class="t-accent">side</span> <span class="t-dim">a|b</span>  flip the record`,
-          `<span class="t-accent">clear</span>     wipe`,
-          `<span class="t-accent">exit</span>      close (esc and :q also work)`,
-          `<span class="t-dim">…there are more. this is a crate; dig.</span>`,
-        ].join("\n"),
-      );
+      const S = strings(loc());
+      const heads = S.help.map((h) => `${h.cmd}${h.arg ? " " + h.arg : ""}`);
+      const max = Math.max(...heads.map((h) => h.length));
+      const body = S.help
+        .map((h, i) => {
+          const head = `<span class="t-accent">${esc(h.cmd)}</span>${h.arg ? ` <span class="t-dim">${esc(h.arg)}</span>` : ""}`;
+          const pad = " ".repeat(max - heads[i]!.length + 2);
+          return `${head}${pad}<span class="t-dim">${esc(h.desc)}</span>`;
+        })
+        .join("\n");
+      raw(`${body}\n<span class="t-dim">${esc(S.helpMore)}</span>`);
     },
+
+    ls: (args) => {
+      const all = args.includes("-a") || args.includes("--all");
+      const target = args.find((a) => !a.startsWith("-"));
+      const { path, node } = lookup(target);
+      if (!node) return err(strings(loc()).noSuchFile(target ?? path));
+      if (!isDir(node)) return raw(nameSpan(path.split("/").pop() ?? path, node));
+      raw(lsHtml(node, all, strings(loc()).emptyDir));
+    },
+
+    cd: (args) => {
+      const target = args[0];
+      const { path, node } = lookup(target);
+      if (!node) return err(strings(loc()).noSuchFile(target ?? path));
+      if (!isDir(node)) return err(strings(loc()).notDir(target ?? path));
+      cwd = path;
+      setPrompt(promptPath(cwd));
+    },
+
+    pwd: () => out(cwd),
+
+    cat: (args) => {
+      const arg = args[0];
+      if (!arg) {
+        raw(`<span class="t-art t-gold">${esc(CAT)}</span>`);
+        return out(strings(loc()).catMeow);
+      }
+      const numeric = /^\d{1,2}$/.test(arg) ? arg.padStart(2, "0") : null;
+      let node = lookup(arg).node;
+      if (!node && numeric) {
+        const site = nodeAt(`${HOME}/site`);
+        if (isDir(site)) {
+          const match = Object.keys(site.children).find((n) => n.startsWith(numeric));
+          if (match) node = site.children[match]!;
+        }
+      }
+      if (!node) return err(strings(loc()).noSuchFile(arg));
+      if (isDir(node)) return err(strings(loc()).isDir(arg));
+      const text = readFile(node, loc());
+      if (text === "") return; // /dev/null and friends
+      if (node.art) return raw(`<span class="t-art t-gold">${esc(text)}</span>`);
+      out(text);
+    },
+
+    tree: (args) => {
+      const all = args.includes("-a");
+      const target = args.find((a) => !a.startsWith("-"));
+      const { path, node } = lookup(target);
+      if (!node) return err(strings(loc()).noSuchFile(target ?? path));
+      if (!isDir(node)) return raw(nameSpan(path.split("/").pop() ?? path, node));
+      raw(`<span class="t-accent">${esc(promptPath(path))}</span>\n${treeLines(node, all, "").join("\n")}`);
+    },
+
+    find: (args) => {
+      const term = args[0];
+      if (!term) return err("usage: find <name>");
+      const start = nodeAt(cwd);
+      if (!isDir(start)) return;
+      const acc: string[] = [];
+      findLines(start, term, promptPath(cwd) === "~" ? "~" : cwd, acc);
+      raw(acc.length ? acc.join("\n") : `<span class="t-dim">— ${esc(term)}: 0</span>`);
+    },
+
     fetch: () => {
+      const hu = loc() === "hu";
       const sw = ["--bg-2", "--accent", "--gold", "--cream", "--mint", "--ink-1"]
         .map((t) => `<span class="t-swatch" style="background:var(${t})"></span>`)
         .join("");
@@ -143,13 +258,13 @@ export default function Terminal({ onClose, onOverlay }: Props): React.ReactElem
           [
             `<span class="t-gold">jxn</span>@<span class="t-gold">${esc(location.host || "jxn-000")}</span>`,
             `<span class="t-dim">──────────────────────────</span>`,
-            `<span class="t-accent">os</span>        static HTML, hand-mastered`,
+            `<span class="t-accent">os</span>        ${hu ? "statikus HTML, kézzel masterelve" : "static HTML, hand-mastered"}`,
             `<span class="t-accent">kernel</span>    astro 5 + react islands`,
-            `<span class="t-accent">shell</span>     this one`,
-            `<span class="t-accent">uptime</span>    ${fmtUptime()} (since last master)`,
+            `<span class="t-accent">shell</span>     ${hu ? "ez itt" : "this one"}`,
+            `<span class="t-accent">uptime</span>    ${fmtUptime()} (${hu ? "az utolsó master óta" : "since last master"})`,
             `<span class="t-accent">build</span>     ${__COMMIT__}`,
-            `<span class="t-accent">packages</span>  0 trackers, 0 cookies`,
-            `<span class="t-accent">cpu</span>       1 developer`,
+            `<span class="t-accent">packages</span>  ${hu ? "0 tracker, 0 cookie" : "0 trackers, 0 cookies"}`,
+            `<span class="t-accent">cpu</span>       ${hu ? "1 fejlesztő" : "1 developer"}`,
             `<span class="t-accent">side</span>      ${document.documentElement.dataset.side ?? "A"}`,
             `<span class="t-accent">cat. no</span>   JXN-000`,
             ``,
@@ -158,48 +273,19 @@ export default function Terminal({ onClose, onOverlay }: Props): React.ReactElem
       );
     },
     neofetch: () => commands.fetch!([]),
-    ls: () => {
-      const items = pageSections()
-        .map((s) => `<span class="t-accent">${s.no}</span>-${esc(s.title)}.md`)
-        .join("\n");
-      raw(items || `<span class="t-dim">empty. you're probably off the record — the tracks live on /en.</span>`);
-    },
-    cat: (args) => {
-      const q = args.join(" ").trim().toLowerCase();
-      if (!q || q === "cat") {
-        // `cat` with nothing to read: the cat.
-        raw(`<span class="t-art t-gold">${esc(CAT)}</span>`);
-        return;
-      }
-      const sections = pageSections();
-      const hit = sections.find(
-        (s) => s.no === q.padStart(2, "0") || s.title.includes(q.replace(/\.md$/, "")),
-      );
-      if (!hit) {
-        err(`cat: ${q}: no such track`);
-        return;
-      }
-      const text = (hit.el.innerText ?? "").replace(/\n{3,}/g, "\n\n").trim();
-      out(text.length > 4000 ? `${text.slice(0, 4000)}\n[…]` : text);
-    },
-    uptime: () => {
-      out(`up ${fmtUptime()} (since last master) — load average: comfortable`);
-    },
-    whoami: () => out("norbert. or jxn, depending on the paperwork."),
-    pwd: () => out("/home/jxn/budapest"),
+
+    uptime: () =>
+      out(`up ${fmtUptime()} (${loc() === "hu" ? "az utolsó master óta" : "since last master"})`),
+    whoami: () => out(strings(loc()).whoami),
     date: () => out(new Date().toString()),
     echo: (args) => out(args.join(" ")),
+
     side: (args) => {
       const side = args[0]?.toLowerCase();
-      if (side !== "a" && side !== "b") {
-        err("usage: side a|b");
-        return;
-      }
-      out("flipping the record…");
+      if (side !== "a" && side !== "b") return err(strings(loc()).usageSide);
+      out(strings(loc()).flipping);
       window.setTimeout(() => {
-        dispatchEvent(
-          new CustomEvent("jxn:flip", { detail: withBase(side === "a" ? "/en" : "/hu") }),
-        );
+        dispatchEvent(new CustomEvent("jxn:flip", { detail: withBase(side === "a" ? "/en" : "/hu") }));
       }, 350);
     },
     pads: () => onOverlay("pads"),
@@ -207,6 +293,7 @@ export default function Terminal({ onClose, onOverlay }: Props): React.ReactElem
     spray: () => onOverlay("spray"),
     mix: () => onOverlay("mix"),
     status: () => onOverlay("status"),
+
     bonsai: () => {
       if (busy) return;
       setBusy(true);
@@ -220,7 +307,6 @@ export default function Terminal({ onClose, onOverlay }: Props): React.ReactElem
           copy[copy.length - 1] = {
             ...copy[copy.length - 1]!,
             kind: "raw",
-            // the tree is 56 cols wide — keep its shape, scroll if the sheet is narrow
             html: `<span class="t-art">${bonsaiToHtml(grid)}</span>`,
           };
           scrollback = copy;
@@ -229,42 +315,43 @@ export default function Terminal({ onClose, onOverlay }: Props): React.ReactElem
         if (next.done) {
           window.clearInterval(bonsaiTimer.current);
           setBusy(false);
-          print(
-            "raw",
-            `<span class="t-dim">done growing. the one in <span class="t-accent">status</span> grows with the site — check back next month.</span>`,
-          );
+          print("raw", `<span class="t-dim">${strings(loc()).bonsaiDone}</span>`);
         }
       }, 80);
     },
-    "hire-me": () => err("permission denied: try sudo."),
+
+    "hire-me": () => err(strings(loc()).hireDenied),
     sudo: (args) => {
       if (args.join(" ").includes("hire-me")) {
+        const note =
+          loc() === "hu"
+            ? `[PLACEHOLDER — email] <span class="t-dim">(a tulaj még nem kötötte be. tényleg.)</span>`
+            : `[PLACEHOLDER — email] <span class="t-dim">(the owner hasn't wired this up yet. genuinely.)</span>`;
         raw(
           [
-            `<span class="t-gold">permission granted.</span> (you seem trustworthy.)`,
+            `<span class="t-gold">${strings(loc()).sudoGranted}</span>`,
             ``,
             `github    <a href="https://github.com/Jxn01">github.com/Jxn01</a>`,
             `linkedin  <a href="https://www.linkedin.com/in/jxn01">linkedin.com/in/jxn01</a>`,
-            `email     [PLACEHOLDER — email] <span class="t-dim">(the owner hasn't wired this up yet. genuinely.)</span>`,
-            ``,
-            `<span class="t-dim">not actively looking — interesting problems get answered first.</span>`,
+            `email     ${note}`,
           ].join("\n"),
         );
       } else {
-        out("we trust you have received the usual lecture. (try: sudo hire-me)");
+        out(strings(loc()).sudoLecture);
       }
     },
     gloria: () => {
-      raw(`<span class="t-art t-gold">${esc(GLORIA)}</span>`);
-      window.setTimeout(() => out("BOOM."), 666);
+      const g = nodeAt(`${HOME}/off-the-clock/dnd/gloria.cannon`);
+      if (g && g.type === "file") raw(`<span class="t-art t-gold">${esc(readFile(g, loc()))}</span>`);
+      window.setTimeout(() => out(strings(loc()).boom), 666);
     },
-    warframe: () => out("~3,000 hours. I understand sunk cost intimately and continue regardless."),
-    play: () => out("the beat is structural here — but the pads are real. try: pads"),
-    vim: () => out("this is not that kind of terminal. (:q works here though, which is more than some can say.)"),
+    warframe: () => out(strings(loc()).warframe),
+    play: () => out(strings(loc()).play),
+    vim: () => out(strings(loc()).vim),
     nano: () => commands.vim!([]),
-    emacs: () => out("no. (respectfully.)"),
-    rm: () => err("rm: this record is read-only. as records should be."),
-    man: () => out("the only manual here is docs/jxn-000-site-asset.md, and you can't have it."),
+    emacs: () => out(strings(loc()).emacs),
+    rm: () => err(strings(loc()).rm),
+    man: () => out(strings(loc()).man),
     clear: () => {
       scrollback = [];
       setLines([]);
@@ -276,17 +363,17 @@ export default function Terminal({ onClose, onOverlay }: Props): React.ReactElem
 
   const run = (input: string): void => {
     const trimmed = input.trim();
-    print("in", esc(trimmed));
+    print(
+      "in",
+      `jxn@jxn-000:<span class="t-path">${esc(promptPath(cwd))}</span>$ ${esc(trimmed)}`,
+    );
     if (!trimmed) return;
     history.push(trimmed);
     histIdx.current = history.length;
     const [cmd = "", ...args] = trimmed.split(/\s+/);
     const fn = commands[cmd.toLowerCase()];
-    if (fn) {
-      fn(args);
-    } else {
-      err(`command not found: ${cmd} — try help`);
-    }
+    if (fn) fn(args);
+    else err(strings(loc()).cmdNotFound(cmd));
   };
 
   const onKeyDown = (e: React.KeyboardEvent<HTMLInputElement>): void => {
@@ -305,6 +392,8 @@ export default function Terminal({ onClose, onOverlay }: Props): React.ReactElem
     }
   };
 
+  const chips = ["ls", "tree", "fetch", "cd ~/projects", "cat readme.txt", "bonsai", "side a", "side b"];
+
   return (
     <div
       className="ov-backdrop"
@@ -314,7 +403,7 @@ export default function Terminal({ onClose, onOverlay }: Props): React.ReactElem
     >
       <div className="window term ov-window" role="dialog" aria-label="terminal">
         <div className="window-bar">
-          <span>jxn@jxn-000: ~</span>
+          <span>jxn@jxn-000: {prompt}</span>
           <span className="win-controls">
             <button className="win-close" onClick={onClose} aria-label="close">
               ×
@@ -323,22 +412,20 @@ export default function Terminal({ onClose, onOverlay }: Props): React.ReactElem
         </div>
         <div className="term-body" ref={bodyRef} onClick={() => inputRef.current?.focus()}>
           {lines.map((l) => (
-            <div
-              key={l.id}
-              className={`t-${l.kind}`}
-              dangerouslySetInnerHTML={{ __html: l.html }}
-            />
+            <div key={l.id} className={`t-${l.kind}`} dangerouslySetInnerHTML={{ __html: l.html }} />
           ))}
         </div>
         <div className="term-chips" aria-label="quick commands">
-          {["help", "fetch", "ls", "bonsai", "pads", "cat 02", "side a", "side b"].map((c) => (
+          {chips.map((c) => (
             <button key={c} onClick={() => run(c)} disabled={busy}>
               {c}
             </button>
           ))}
         </div>
         <div className="term-input-row">
-          <span className="t-prompt">jxn@jxn-000:~$</span>
+          <span className="t-prompt">
+            jxn@jxn-000:<span className="t-path">{prompt}</span>$
+          </span>
           <input
             ref={inputRef}
             value={value}

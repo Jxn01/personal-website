@@ -20,9 +20,18 @@
   }
 }
 
-.term-body .t-accent,
-.term-body .t-in::before {
+.term-body .t-accent {
   text-shadow: 0 0 14px var(--accent-glow);
+}
+
+/* echoed prompt: host in accent, the working path in gold */
+.term-body .t-in {
+  color: var(--accent);
+}
+
+.term-body .t-in .t-path,
+.term-input-row .t-path {
+  color: var(--gold);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -41,15 +50,6 @@
   color: var(--ink-1);
   scrollbar-width: thin;
   scrollbar-color: var(--bg-3) transparent;
-}
-
-.term-body .t-in {
-  color: var(--ink-0);
-}
-
-.term-body .t-in::before {
-  content: "jxn@jxn-000:~$ ";
-  color: var(--accent);
 }
 
 .term-body .t-out {
