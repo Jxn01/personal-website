@@ -188,9 +188,9 @@ export default function Terminal({ onClose, onOverlay }: Props): React.ReactElem
 
     ls: (args) => {
       const all = args.includes("-a") || args.includes("--all");
-      const target = args.find((a) => !a.startsWith("-"));
+      const target = args.find((a) => !a.startsWith("-")) ?? ".";
       const { path, node } = lookup(target);
-      if (!node) return err(strings(loc()).noSuchFile(target ?? path));
+      if (!node) return err(strings(loc()).noSuchFile(target));
       if (!isDir(node)) return raw(nameSpan(path.split("/").pop() ?? path, node));
       raw(lsHtml(node, all, strings(loc()).emptyDir));
     },
@@ -231,9 +231,9 @@ export default function Terminal({ onClose, onOverlay }: Props): React.ReactElem
 
     tree: (args) => {
       const all = args.includes("-a");
-      const target = args.find((a) => !a.startsWith("-"));
+      const target = args.find((a) => !a.startsWith("-")) ?? ".";
       const { path, node } = lookup(target);
-      if (!node) return err(strings(loc()).noSuchFile(target ?? path));
+      if (!node) return err(strings(loc()).noSuchFile(target));
       if (!isDir(node)) return raw(nameSpan(path.split("/").pop() ?? path, node));
       raw(`<span class="t-accent">${esc(promptPath(path))}</span>\n${treeLines(node, all, "").join("\n")}`);
     },
@@ -244,7 +244,8 @@ export default function Terminal({ onClose, onOverlay }: Props): React.ReactElem
       const start = nodeAt(cwd);
       if (!isDir(start)) return;
       const acc: string[] = [];
-      findLines(start, term, promptPath(cwd) === "~" ? "~" : cwd, acc);
+      const base = cwd === "/" ? "" : promptPath(cwd) === "~" ? "~" : cwd;
+      findLines(start, term, base, acc);
       raw(acc.length ? acc.join("\n") : `<span class="t-dim">— ${esc(term)}: 0</span>`);
     },
 
