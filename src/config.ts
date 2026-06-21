@@ -7,13 +7,13 @@
  */
 export const config = {
   /** Contact email. null → visible placeholder on the site. */
-  email: null as string | null,
+  email: "jxn.personal@gmail.com" as string | null,
   /** 09 — NOW: the game currently killing you. */
-  currentGame: null as string | null,
+  currentGame: "Hollow Knight: Silksong" as string | null,
   /** Footer easter egg: `now spinning:` line. null → line hidden. */
-  currentAlbum: null as string | null,
+  currentAlbum: "To Pimp a Butterfly" as string | null,
   /** 09 — NOW: last-updated date, e.g. "2026-06". null → visible placeholder. */
-  nowUpdated: null as string | null,
+  nowUpdated: "2026-06" as string | null,
 
   /** The site went live (first commit). The bonsai grows from this date. */
   launchDate: "2026-06-11",
