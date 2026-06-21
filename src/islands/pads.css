@@ -91,26 +91,46 @@
   max-width: 24rem;
 }
 
-/* mobile: the whole kit fits the screen — no horizontal scroll, ever.
-   `.pads .pads-row` (0,2,0) outranks every base/global single-class rule,
-   so this wins no matter how the two stylesheets end up ordered. */
+/* mobile: a compact, full-width kit — no horizontal scroll, rows tight, cells
+   wide. `.pads .x` (0,2,0) outranks every base/global single-class rule. */
 @media (max-width: 640px) {
+  /* flex column so the grid takes the FULL width (a centred grid collapses
+     the 1fr columns to ~nothing — that was the barcode bug) */
+  .pads .pads-body {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 1.1rem;
+  }
+
   .pads .pads-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    width: 100%;
     overflow: visible;
   }
 
   .pads .pads-row {
-    grid-template-columns: 2.1rem repeat(var(--steps), minmax(0, 1fr));
-    gap: 0.16rem;
+    grid-template-columns: 2.2rem repeat(var(--steps), minmax(0, 1fr));
+    gap: 0.2rem;
+    align-items: center;
   }
 
+  /* wide, low cells read as a drum grid, not a barcode */
   .pads .pads-cell {
     min-width: 0;
     aspect-ratio: auto;
-    height: 1.7rem;
+    height: 1.5rem;
+    border-radius: 3px;
+  }
+
+  .pads .pads-cell[data-beat] {
+    border-color: color-mix(in oklab, var(--accent) 38%, var(--line-0));
   }
 
   .pads .pads-voice {
-    font-size: 0.56rem;
+    font-size: 0.58rem;
+    height: 1.5rem;
   }
 }

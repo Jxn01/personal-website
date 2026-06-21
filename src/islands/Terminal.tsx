@@ -139,7 +139,7 @@ export default function Terminal({ onClose, onOverlay }: Props): React.ReactElem
         .map((t) => `<span class="t-swatch" style="background:var(${t})"></span>`)
         .join("");
       raw(
-        `<span class="t-accent">${esc(JXN_ART)}</span>\n` +
+        `<span class="t-art t-accent">${esc(JXN_ART)}</span>\n` +
           [
             `<span class="t-gold">jxn</span>@<span class="t-gold">${esc(location.host || "jxn-000")}</span>`,
             `<span class="t-dim">──────────────────────────</span>`,
@@ -168,7 +168,7 @@ export default function Terminal({ onClose, onOverlay }: Props): React.ReactElem
       const q = args.join(" ").trim().toLowerCase();
       if (!q || q === "cat") {
         // `cat` with nothing to read: the cat.
-        raw(`<span class="t-gold">${esc(CAT)}</span>`);
+        raw(`<span class="t-art t-gold">${esc(CAT)}</span>`);
         return;
       }
       const sections = pageSections();
@@ -220,7 +220,8 @@ export default function Terminal({ onClose, onOverlay }: Props): React.ReactElem
           copy[copy.length - 1] = {
             ...copy[copy.length - 1]!,
             kind: "raw",
-            html: bonsaiToHtml(grid),
+            // the tree is 56 cols wide — keep its shape, scroll if the sheet is narrow
+            html: `<span class="t-art">${bonsaiToHtml(grid)}</span>`,
           };
           scrollback = copy;
           return copy;
@@ -254,7 +255,7 @@ export default function Terminal({ onClose, onOverlay }: Props): React.ReactElem
       }
     },
     gloria: () => {
-      raw(`<span class="t-gold">${esc(GLORIA)}</span>`);
+      raw(`<span class="t-art t-gold">${esc(GLORIA)}</span>`);
       window.setTimeout(() => out("BOOM."), 666);
     },
     warframe: () => out("~3,000 hours. I understand sunk cost intimately and continue regardless."),

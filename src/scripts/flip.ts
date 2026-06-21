@@ -1,29 +1,41 @@
 import { navigate } from "astro:transitions/client";
 
 /**
- * The record flip — a cover panel does the rotating, never the page. The real
- * content (hero canvas, deck, scroll) is untouched, so nothing breaks.
+ * THE FLIP — a tunnel/iris transition that turns the record over.
  *
- * Sequence, matching the concept:
- *   1. cover rotates in from edge-on → flat, hiding the page (≈340ms)
- *   2. on flat, the page swaps underneath, scroll anchored (invisible)
- *   3. HOLD ≈900ms — only the flipping label is visible (the record on edge)
- *   4. cover rotates out flat → edge-on the OTHER way, revealing the new side
+ *   ACT 1 · ENTER   the iris closes (a black ring phases inward), the page
+ *                   recedes down the tunnel and a vinyl coalesces in the
+ *                   middle — the page "zooms out into a record."
+ *   — swap —        at the deepest point the DOM swaps, hidden behind the disc.
+ *   ACT 2 · FLIP    the record spins on its axis (A→B one way, B→A the mirror),
+ *                   "flipping the record" holding under it.
+ *   ACT 3 · EXIT    the iris opens fast (the ring phases back out through the
+ *                   camera), the disc zooms up and dissolves into the new page.
  *
- * Direction depends on which way you're going: A→B spins one way, B→A the
- * mirror. So flipping back undoes the motion, like turning a record over.
- *
- * Scroll is restored by TRACK, not by pixel: both records share the same
- * tracklist (#t01…#t10), so we land on the same track at the same offset
- * even though the two languages run to slightly different lengths.
+ * Driven entirely by the Web Animations API on the persisted #flip-stage — the
+ * real page is never transformed, so the hero/canvas/deck can't break. Scroll
+ * is restored by track anchor (both sides share #t01…#t10) and pinned through
+ * the hidden stretch so it never jumps.
  */
 
-const PERSP = "1600px";
-const SPIN = 340; // each half of the rotation
-const HOLD = 900; // edge-on pause
-const COVER_ID = "flip-cover";
+const STAGE_ID = "flip-stage";
 const ANCHOR_KEY = "jxn.flipAnchor";
 const PENDING_KEY = "jxn.flipping";
+
+// timing (ms)
+const ENTER_MS = 430;
+const FLIP_MS = 700;
+const EXIT_MS = 400;
+
+// geometry
+const HOLE_OPEN = "152%"; // iris fully open (page visible)
+const HOLE_SHUT = "16%"; // iris closed around the disc
+const SCALE_PAGE = 1.55; // disc scale when "is the page" (zoomed in)
+const SCALE_DISC = 0.62; // disc scale at the bottom of the tunnel
+
+const EASE_IN = "cubic-bezier(.6, 0, .9, .25)"; // accelerate down the tunnel
+const EASE_OUT = "cubic-bezier(.1, .75, .35, 1)"; // accelerate out, settle
+const EASE_SPIN = "cubic-bezier(.5, 0, .5, 1)";
 
 interface Anchor {
   id: string;
@@ -32,16 +44,20 @@ interface Anchor {
 }
 
 let busy = false;
-let targetY = 0;
 let lastAnchor: Anchor | null = null;
 
-function cover(): HTMLElement | null {
-  return document.getElementById(COVER_ID);
-}
+const stage = (): HTMLElement | null => document.getElementById(STAGE_ID);
+const veil = (): HTMLElement | null =>
+  stage()?.querySelector(".flip-veil") ?? null;
+const disc = (): HTMLElement | null =>
+  stage()?.querySelector(".flip-disc") ?? null;
+const disc3d = (): HTMLElement | null =>
+  stage()?.querySelector(".flip-disc-3d") ?? null;
+const caption = (): HTMLElement | null =>
+  stage()?.querySelector(".flip-cap") ?? null;
 
-function reduce(): boolean {
-  return matchMedia("(prefers-reduced-motion: reduce)").matches;
-}
+const reduce = (): boolean =>
+  matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 function jump(y: number): void {
   window.scrollTo({ top: y, left: 0, behavior: "instant" as ScrollBehavior });
@@ -81,10 +97,44 @@ function resolveAnchor(a: Anchor | null): number {
   return a.y;
 }
 
+/** Animate and resolve when done, leaving the final frame committed inline. */
+function run(
+  el: Element | null,
+  frames: Keyframe[],
+  duration: number,
+  easing: string,
+): Promise<void> {
+  if (!el) return Promise.resolve();
+  const a = el.animate(frames, { duration, easing, fill: "both" });
+  return a.finished.then(() => {
+    try {
+      a.commitStyles();
+    } catch {
+      /* commitStyles can throw on detached nodes — safe to ignore */
+    }
+    a.cancel();
+  });
+}
+
+/** Park the stage in a known state without animating. */
+function setStage(opts: { hole: string; scale: number; discOpacity: number; capOpacity: number; rotate: number }): void {
+  const v = veil();
+  const d = disc();
+  const d3 = disc3d();
+  const c = caption();
+  if (v) v.style.setProperty("--flip-hole", opts.hole);
+  if (d) {
+    d.style.transform = `scale(${opts.scale})`;
+    d.style.opacity = String(opts.discOpacity);
+  }
+  if (d3) d3.style.transform = `rotateY(${opts.rotate}deg)`;
+  if (c) c.style.opacity = String(opts.capOpacity);
+}
+
 export function flipTo(href: string): void {
   if (busy) return;
-  const c = cover();
-  if (!c || reduce()) {
+  const st = stage();
+  if (!st || reduce()) {
     void navigate(href);
     return;
   }
@@ -92,29 +142,36 @@ export function flipTo(href: string): void {
   document.documentElement.classList.add("flipping");
 
   const toB = goingToB(href);
-  const inFrom = toB ? 90 : -90;
-
-  c.style.transition = "none";
-  c.style.transform = `perspective(${PERSP}) rotateY(${inFrom}deg)`;
-  c.classList.add("on");
-
-  const anchor = captureAnchor();
-  lastAnchor = anchor;
-  sessionStorage.setItem(ANCHOR_KEY, JSON.stringify(anchor));
+  lastAnchor = captureAnchor();
+  sessionStorage.setItem(ANCHOR_KEY, JSON.stringify(lastAnchor));
   sessionStorage.setItem(PENDING_KEY, toB ? "B" : "A");
 
-  requestAnimationFrame(() => {
-    requestAnimationFrame(() => {
-      c.style.transition = `transform ${SPIN}ms cubic-bezier(.5, 0, .5, 1)`;
-      c.style.transform = `perspective(${PERSP}) rotateY(0deg)`;
-    });
-  });
+  // prime: iris open, disc large + invisible (it IS the page), flat, no caption
+  setStage({ hole: HOLE_OPEN, scale: SCALE_PAGE, discOpacity: 0, capOpacity: 0, rotate: 0 });
+  st.classList.add("on");
 
-  window.setTimeout(() => void navigate(href), SPIN + 30);
+  // ACT 1 — the tunnel closes, the page recedes, a vinyl coalesces
+  void Promise.all([
+    run(veil(), [{ "--flip-hole": HOLE_OPEN } as Keyframe, { "--flip-hole": HOLE_SHUT } as Keyframe], ENTER_MS, EASE_IN),
+    run(
+      disc(),
+      [
+        { transform: `scale(${SCALE_PAGE})`, opacity: 0 },
+        { transform: `scale(${SCALE_DISC})`, opacity: 1 },
+      ],
+      ENTER_MS,
+      EASE_IN,
+    ),
+    run(caption(), [{ opacity: 0 }, { opacity: 1 }], ENTER_MS, EASE_OUT),
+  ]).then(() => {
+    // hold the closed state and swap the page underneath the disc
+    setStage({ hole: HOLE_SHUT, scale: SCALE_DISC, discOpacity: 1, capOpacity: 1, rotate: 0 });
+    void navigate(href);
+  });
 }
 
-/** Phase 3+4: after the new page mounts under the cover, hold then reveal. */
-function finishFlip(): void {
+/** ACT 2 + 3, after the new page has mounted behind the disc. */
+async function finishFlip(): Promise<void> {
   const pending = sessionStorage.getItem(PENDING_KEY);
   if (!pending) return;
   sessionStorage.removeItem(PENDING_KEY);
@@ -130,72 +187,93 @@ function finishFlip(): void {
   }
   sessionStorage.removeItem(ANCHOR_KEY);
 
-  // Re-resolve every tick: the hero (92svh + a late-mounting canvas) and any
-  // reflow can change track offsets AFTER we first restore. Anchoring to the
-  // track and recomputing each frame absorbs all of it. The cover is opaque,
-  // so none of this correction is ever seen.
-  const pin = (): void => {
-    targetY = resolveAnchor(lastAnchor);
-    jump(targetY);
-  };
+  // keep scroll pinned to the track anchor through the whole hidden stretch —
+  // the hero (92svh + late canvas) can reflow after restore; recompute each tick
+  const pin = (): void => jump(resolveAnchor(lastAnchor));
   pin();
   const lock = window.setInterval(pin, 16);
-  // also react immediately to layout growth (lazy media, island mount)
   const ro = new ResizeObserver(pin);
   ro.observe(document.documentElement);
-  window.setTimeout(() => {
+
+  const st = stage();
+  if (!st) {
     window.clearInterval(lock);
     ro.disconnect();
-  }, HOLD + SPIN + 160);
-
-  const c = cover();
-  if (!c) {
     document.documentElement.classList.remove("flipping");
     busy = false;
     return;
   }
 
-  c.classList.add("on");
-  c.style.transition = "none";
-  c.style.transform = `perspective(${PERSP}) rotateY(0deg)`;
+  // make sure we're parked closed over the fresh page
+  st.classList.add("on");
+  setStage({ hole: HOLE_SHUT, scale: SCALE_DISC, discOpacity: 1, capOpacity: 1, rotate: 0 });
 
-  const outTo = pending === "B" ? -90 : 90;
+  const dir = pending === "B" ? 1 : -1; // A→B spins one way, B→A mirrors it
 
-  window.setTimeout(() => {
-    pin(); // settle once more right before the reveal
-    requestAnimationFrame(() => {
-      c.style.transition = `transform ${SPIN}ms cubic-bezier(.5, 0, .5, 1)`;
-      c.style.transform = `perspective(${PERSP}) rotateY(${outTo}deg)`;
-    });
-    window.setTimeout(() => {
-      jump(targetY);
-      c.classList.remove("on");
-      c.style.transition = "none";
-      document.documentElement.classList.remove("flipping");
-      busy = false;
-      lastAnchor = null;
-    }, SPIN + 20);
-  }, HOLD);
+  // ACT 2 — the record turns over
+  await run(
+    disc3d(),
+    [
+      { transform: "rotateY(0deg)" },
+      { transform: `rotateY(${180 * dir}deg)` },
+    ],
+    FLIP_MS,
+    EASE_SPIN,
+  );
+
+  // ACT 3 — the iris opens fast, the disc zooms up and dissolves into the page
+  pin();
+  await Promise.all([
+    run(veil(), [{ "--flip-hole": HOLE_SHUT } as Keyframe, { "--flip-hole": HOLE_OPEN } as Keyframe], EXIT_MS, EASE_OUT),
+    run(
+      disc(),
+      [
+        { transform: `scale(${SCALE_DISC})`, opacity: 1 },
+        { transform: `scale(${SCALE_PAGE})`, opacity: 0 },
+      ],
+      EXIT_MS,
+      EASE_OUT,
+    ),
+    run(caption(), [{ opacity: 1 }, { opacity: 0 }], EXIT_MS * 0.7, EASE_IN),
+  ]);
+
+  jump(resolveAnchor(lastAnchor));
+  window.clearInterval(lock);
+  ro.disconnect();
+  st.classList.remove("on");
+  // reset for next time
+  setStage({ hole: HOLE_OPEN, scale: SCALE_PAGE, discOpacity: 0, capOpacity: 0, rotate: 0 });
+  if (disc3d()) disc3d()!.style.transform = "rotateY(0deg)";
+  document.documentElement.classList.remove("flipping");
+  busy = false;
+  lastAnchor = null;
 }
 
-/* — restore the instant the new DOM is in, before it can paint —————————————— */
+/* — restore scroll the instant the new DOM is in, before it can paint ——————— */
 document.addEventListener("astro:after-swap", () => {
   if (!sessionStorage.getItem(PENDING_KEY)) return;
   jump(resolveAnchor(lastAnchor));
-  cover()?.classList.add("on");
+  stage()?.classList.add("on"); // re-assert over the fresh document
 });
 
-document.addEventListener("astro:page-load", finishFlip);
+document.addEventListener("astro:page-load", () => void finishFlip());
 
 /* — entry points ———————————————————————————————————————————————————————————— */
 
-document.addEventListener("click", (e) => {
-  const a = (e.target as HTMLElement).closest?.("a[data-flip]");
-  if (!(a instanceof HTMLAnchorElement)) return;
-  if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return; // respect new-tab
-  e.preventDefault();
-  flipTo(a.href);
-});
+// capture phase + stopImmediatePropagation so we win the click before Astro's
+// ClientRouter can navigate it plainly
+document.addEventListener(
+  "click",
+  (e) => {
+    const a = (e.target as HTMLElement).closest?.("a[data-flip]");
+    if (!(a instanceof HTMLAnchorElement)) return;
+    if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return; // respect new-tab
+    e.preventDefault();
+    e.stopImmediatePropagation();
+    flipTo(a.href);
+  },
+  { capture: true },
+);
 
 addEventListener("jxn:flip", (e) => {
   flipTo((e as CustomEvent<string>).detail);
@@ -208,4 +286,4 @@ addEventListener("unhandledrejection", (e) => {
   }
 });
 
-if (sessionStorage.getItem(PENDING_KEY)) finishFlip();
+if (sessionStorage.getItem(PENDING_KEY)) void finishFlip();

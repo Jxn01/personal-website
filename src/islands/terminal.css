@@ -62,9 +62,24 @@
   white-space: pre-wrap;
 }
 
+/* raw text wraps instead of running off the x-axis; ASCII art opts out via
+   .t-art, which keeps its shape and scrolls horizontally on its own */
 .term-body .t-raw {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.term-body .t-art {
+  display: block;
   white-space: pre;
   overflow-x: auto;
+  max-width: 100%;
+  scrollbar-width: none;
+}
+
+.term-body .t-art::-webkit-scrollbar {
+  display: none;
 }
 
 .term-body .t-accent {

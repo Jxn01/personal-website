@@ -107,11 +107,33 @@ the toys are in the deck, bottom right. the terminal also answers to ~
     <div id="toast" role="status" aria-live="polite"></div>
     <pre id="cat-walk" aria-hidden="true"></pre>
 
-    {/* the record flip cover — persisted so it survives the page swap it covers */}
-    <div id="flip-cover" aria-hidden="true" transition:persist>
-      <div class="flip-cover-inner">
-        <span class="flip-mark">JXN-000</span>
-        <span class="flip-sub">flipping the record</span>
+    {/* THE FLIP STAGE — a tunnel/iris transition that zooms the page out into
+        a spinning vinyl and back. Persisted so it survives the page swap it
+        hides. Inert and invisible outside a flip. Driven by flip.ts (WAAPI). */}
+    <div id="flip-stage" aria-hidden="true" transition:persist>
+      <div class="flip-veil"></div>
+      <div class="flip-scene">
+        <div class="flip-disc">
+          <div class="flip-disc-3d">
+            <div class="disc-face disc-front">
+              <span class="disc-sheen"></span>
+              <span class="disc-label">
+                <span class="dl-cat">JXN-000</span>
+                <span class="dl-sub">side a · 33⅓</span>
+              </span>
+              <span class="disc-hole"></span>
+            </div>
+            <div class="disc-face disc-back">
+              <span class="disc-sheen"></span>
+              <span class="disc-label">
+                <span class="dl-cat">JXN-000</span>
+                <span class="dl-sub">side b · 33⅓</span>
+              </span>
+              <span class="disc-hole"></span>
+            </div>
+          </div>
+        </div>
+        <p class="flip-cap">flipping the record</p>
       </div>
     </div>
 
