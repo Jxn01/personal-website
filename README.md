@@ -33,9 +33,6 @@ Push to `main`; `.github/workflows/deploy.yml` does the rest.
   to the `deploy` branch. The server behind jxn.hu pulls that branch every
   10 minutes and swaps the new build in atomically (the previous builds stay
   for an instant rollback).
-- **GitHub Pages** (`jxn01.github.io/personal-website/`, built with
-  `BASE_PATH=/personal-website`) — the public copy until jxn.hu is reachable
-  from the internet; then its job goes.
 
 `SITE` and `BASE_PATH` are the only deploy knobs (`astro.config.mjs`); unset,
 the build targets jxn.hu at the root.

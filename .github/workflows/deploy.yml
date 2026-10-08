@@ -1,13 +1,10 @@
 name: deploy
 
-# JXN-000 ships itself. Push to the default branch → two static builds:
-#
-#   jxn-hu  SITE=https://jxn.hu, served from root; `publish` force-pushes its
-#           dist/ as a single commit to the `deploy` branch, which the
-#           self-hosted server pulls every 10 minutes and swaps in atomically.
-#   pages   the GitHub Pages copy at jxn01.github.io/personal-website/ — kept
-#           only until jxn.hu is reachable from the internet; then delete this
-#           job (and the Pages site) and jxn.hu is the one deploy.
+# JXN-000 ships itself. Push to the default branch → a static build for
+# https://jxn.hu (served from root); `publish` force-pushes its dist/ as a single
+# commit to the `deploy` branch, which the self-hosted server pulls every
+# 10 minutes and swaps in atomically. (GitHub Pages served a copy until jxn.hu
+# went public on 2026-10-08.)
 
 on:
   push:
@@ -76,50 +73,3 @@ jobs:
           git add -A
           git commit -q -m "deploy ${GITHUB_SHA::7}"
           git push -q -f "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" deploy
-
-  # The same split for Pages: the build runs package code with a read-only token; only the deploy
-  # step, which runs none, holds pages:write and the OIDC token.
-  pages:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          persist-credentials: false
-
-      - uses: pnpm/action-setup@v4
-        with:
-          version: 9
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: pnpm
-
-      - run: pnpm install --frozen-lockfile
-
-      - name: build
-        env:
-          # project site lives at jxn01.github.io/personal-website/
-          BASE_PATH: /personal-website
-          SITE: https://jxn01.github.io
-        run: pnpm build
-
-      - uses: actions/upload-pages-artifact@v3
-        with:
-          path: dist
-
-  pages-deploy:
-    needs: pages
-    runs-on: ubuntu-latest
-    permissions:
-      pages: write
-      id-token: write
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - id: deployment
-        uses: actions/deploy-pages@v4

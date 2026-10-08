@@ -15,10 +15,9 @@ try {
   /* shallow or detached environments still get a build */
 }
 
-// Deploy target is env-driven. GitHub Pages project site serves from a
-// subpath; the custom domain (jxn.hu, self-hosted) serves from root.
-//   BASE_PATH=/personal-website  SITE=https://jxn01.github.io  → Pages
-//   (unset)                                                    → jxn.hu, root "/"
+// Deploy target is env-driven: unset, the build targets jxn.hu (self-hosted) at
+// the root "/". A subpath host would set both, e.g. a GitHub Pages project site:
+//   BASE_PATH=/personal-website  SITE=https://jxn01.github.io
 const BASE_PATH = process.env.BASE_PATH || "/";
 const SITE = process.env.SITE || "https://jxn.hu";
 
