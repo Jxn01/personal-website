@@ -2,9 +2,9 @@ name: deploy
 
 # JXN-000 ships itself. Push to the default branch → two static builds:
 #
-#   jxn-hu  SITE=https://jxn.hu, served from root. dist/ is force-pushed as a
-#           single commit to the `deploy` branch; the self-hosted server pulls
-#           that branch every 10 minutes and swaps it in atomically.
+#   jxn-hu  SITE=https://jxn.hu, served from root; `publish` force-pushes its
+#           dist/ as a single commit to the `deploy` branch, which the
+#           self-hosted server pulls every 10 minutes and swaps in atomically.
 #   pages   the GitHub Pages copy at jxn01.github.io/personal-website/ — kept
 #           only until jxn.hu is reachable from the internet; then delete this
 #           job (and the Pages site) and jxn.hu is the one deploy.
@@ -20,14 +20,17 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  # Built with a READ-only token: install/build run third-party package code, which must never hold
+  # the right to push. Only `publish` -- which runs none -- can write, and only the deploy branch.
   jxn-hu:
     runs-on: ubuntu-latest
     permissions:
-      contents: write # push the `deploy` branch
+      contents: read
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0 # full history → real commit hash in the status readout
+          persist-credentials: false # no token left in .git/config for build steps to find
 
       - uses: pnpm/action-setup@v4
         with:
@@ -45,6 +48,23 @@ jobs:
           SITE: https://jxn.hu # BASE_PATH unset → root "/"
         run: pnpm build
 
+      - uses: actions/upload-artifact@v4
+        with:
+          name: jxn-hu-dist
+          path: dist
+          retention-days: 1
+
+  publish:
+    needs: jxn-hu
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # push the `deploy` branch
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: jxn-hu-dist
+          path: dist
+
       - name: publish dist/ to the deploy branch
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -57,19 +77,17 @@ jobs:
           git commit -q -m "deploy ${GITHUB_SHA::7}"
           git push -q -f "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" deploy
 
+  # The same split for Pages: the build runs package code with a read-only token; only the deploy
+  # step, which runs none, holds pages:write and the OIDC token.
   pages:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      pages: write
-      id-token: write
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          persist-credentials: false
 
       - uses: pnpm/action-setup@v4
         with:
@@ -93,5 +111,15 @@ jobs:
         with:
           path: dist
 
+  pages-deploy:
+    needs: pages
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
       - id: deployment
         uses: actions/deploy-pages@v4
