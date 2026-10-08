@@ -5,8 +5,8 @@ import sitemap from "@astrojs/sitemap";
 import { execSync } from "node:child_process";
 
 // JXN-000 — the site itself is a portfolio piece: static-first, clean under
-// view-source, fast. Domain-agnostic per spec (lives at jxn.ddns.net for now,
-// but nothing here assumes it).
+// view-source, fast. Domain-agnostic per spec (lives at jxn.hu, but nothing
+// here assumes it).
 
 let commit = "0000000";
 try {
@@ -16,11 +16,11 @@ try {
 }
 
 // Deploy target is env-driven. GitHub Pages project site serves from a
-// subpath; the eventual custom domain (jxn.ddns.net) serves from root.
+// subpath; the custom domain (jxn.hu, self-hosted) serves from root.
 //   BASE_PATH=/personal-website  SITE=https://jxn01.github.io  → Pages
-//   (unset)                                                    → root "/"
+//   (unset)                                                    → jxn.hu, root "/"
 const BASE_PATH = process.env.BASE_PATH || "/";
-const SITE = process.env.SITE || "https://jxn.ddns.net";
+const SITE = process.env.SITE || "https://jxn.hu";
 
 export default defineConfig({
   site: SITE,

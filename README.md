@@ -25,6 +25,21 @@ pnpm build      # static output → dist/
 pnpm preview
 ```
 
+## Deploy
+
+Push to `main`; `.github/workflows/deploy.yml` does the rest.
+
+- **jxn.hu** — built with `SITE=https://jxn.hu` and force-pushed as one commit
+  to the `deploy` branch. The server behind jxn.hu pulls that branch every
+  10 minutes and swaps the new build in atomically (the previous builds stay
+  for an instant rollback).
+- **GitHub Pages** (`jxn01.github.io/personal-website/`, built with
+  `BASE_PATH=/personal-website`) — the public copy until jxn.hu is reachable
+  from the internet; then its job goes.
+
+`SITE` and `BASE_PATH` are the only deploy knobs (`astro.config.mjs`); unset,
+the build targets jxn.hu at the root.
+
 ## Map
 
 - `/en` — SIDE A (canonical) · `/hu` — SIDE B. The header toggle flips the record.

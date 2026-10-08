@@ -1,31 +1,75 @@
-name: deploy to github pages
+name: deploy
 
-# JXN-000 ships itself. Push to the default branch → static build → Pages.
-# When the custom domain (jxn.ddns.net) is ready, drop BASE_PATH and point
-# SITE at it — nothing else changes.
+# JXN-000 ships itself. Push to the default branch → two static builds:
+#
+#   jxn-hu  SITE=https://jxn.hu, served from root. dist/ is force-pushed as a
+#           single commit to the `deploy` branch; the self-hosted server pulls
+#           that branch every 10 minutes and swaps it in atomically.
+#   pages   the GitHub Pages copy at jxn01.github.io/personal-website/ — kept
+#           only until jxn.hu is reachable from the internet; then delete this
+#           job (and the Pages site) and jxn.hu is the one deploy.
 
 on:
   push:
     branches: [main]
   workflow_dispatch:
 
-permissions:
-  contents: read
-  pages: write
-  id-token: write
-
 # one live deploy at a time; let an in-flight run finish
 concurrency:
-  group: pages
+  group: deploy
   cancel-in-progress: false
 
 jobs:
-  build:
+  jxn-hu:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write # push the `deploy` branch
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0 # full history → real commit hash in the status readout
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: build
+        env:
+          SITE: https://jxn.hu # BASE_PATH unset → root "/"
+        run: pnpm build
+
+      - name: publish dist/ to the deploy branch
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          cd dist
+          git init -q -b deploy
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -q -m "deploy ${GITHUB_SHA::7}"
+          git push -q -f "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" deploy
+
+  pages:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - uses: pnpm/action-setup@v4
         with:
@@ -49,12 +93,5 @@ jobs:
         with:
           path: dist
 
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
       - id: deployment
         uses: actions/deploy-pages@v4

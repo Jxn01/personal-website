@@ -46,7 +46,7 @@ Two layers. **Techwear is the garment; hip-hop is the lining.** The hip-hop infl
 - **The photo:** use the provided warm portrait. Slight duotone/desaturation so it sits in the palette without losing the smirk. Warm human on cold site = intended tension.
 - **War stories UI:** expandable cards or "field notes" log — mono timestamps, incident-report styling.
 - **Performance:** this site is itself a portfolio piece; it should be fast, accessible, and clean under view-source.
-- **Hosting note:** lives at `jxn.ddns.net` for now; build nothing that assumes a specific domain.
+- **Hosting note:** lives at `jxn.hu`; build nothing that assumes a specific domain.
 
 ---
 
@@ -228,7 +228,7 @@ I'm not actively looking — but interesting problems get answered first.
 produced & engineered by Norbert Oláh
 recorded in Budapest · mixed with machines · mastered by hand
 no cookies · no trackers · no skill bars
-JXN-000 · running on jxn.ddns.net until further notice
+JXN-000 · running on jxn.hu until further notice
 ```
 
 *(Pick 2–3 lines, don't use all four. The catalog number self-reference — the site itself is JXN-000 — is the kind of detail that rewards attention.)*
@@ -411,7 +411,7 @@ Nem keresek aktívan — de az érdekes problémák kapnak választ először.
 készítette és hangmérnökölte: Oláh Norbert
 felvétel: Budapest · keverés: gépekkel · master: kézzel
 se cookie · se tracker · se skill bar
-JXN-000 · jelenleg a jxn.ddns.net címen fut
+JXN-000 · jelenleg a jxn.hu címen fut
 ```
 
 ---
